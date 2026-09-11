@@ -1,0 +1,1107 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1C2220">
+<meta name="description" content="Collares GPS para ovejas y cuaderno de campo: pérdidas por depredadores y sarna.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Majada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#EDEFE8; --surface:#FFFFFF; --sunk:#E2E5DC; --ink:#1C2220; --muted:#57615B; --line:#D2D7CD;
+  --coiron:#B7842A; --steel:#2E6386; --on-steel:#FFFFFF; --steel-soft:#DCE7EF; --rust:#A63F2B; --rust-soft:#F3E0D9; --on-rust:#FFFFFF;
+  --ok:#3A7345; --warn:#A8700A; --crit:#B23A26; --crit-soft:#F6DFD8; --warn-soft:#F5E9CF; --off:#7E8781;
+  --f-disp:'Barlow Semi Condensed','Arial Narrow',system-ui,sans-serif;
+  --f-body:'Barlow',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --r:12px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#131715; --surface:#1B201D; --sunk:#242A26; --ink:#E7EBE4; --muted:#9BA59E; --line:#313934;
+    --coiron:#D8AD55; --steel:#79AED2; --on-steel:#131715; --steel-soft:#1D2E3A; --rust:#E07A62; --rust-soft:#3A2520; --on-rust:#131715;
+    --ok:#7DBA87; --warn:#E0B354; --crit:#E8735C; --crit-soft:#3B221C; --warn-soft:#352C17; --off:#8B948E;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131715; --surface:#1B201D; --sunk:#242A26; --ink:#E7EBE4; --muted:#9BA59E; --line:#313934;
+  --coiron:#D8AD55; --steel:#79AED2; --on-steel:#131715; --steel-soft:#1D2E3A; --rust:#E07A62; --rust-soft:#3A2520; --on-rust:#131715;
+  --ok:#7DBA87; --warn:#E0B354; --crit:#E8735C; --crit-soft:#3B221C; --warn-soft:#352C17; --off:#8B948E;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+h1,h2,h3{font-family:var(--f-disp);font-weight:700;line-height:1.1;margin:0;text-wrap:balance}
+p{margin:0}
+:focus-visible{outline:3px solid var(--steel);outline-offset:2px}
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.top-in,.wrap{max-width:640px;margin:0 auto;padding-inline:16px}
+.top-in{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;padding-block:6px}
+.brand{display:flex;align-items:baseline;gap:8px;min-width:0}
+.logo{font-family:var(--f-disp);font-weight:700;font-size:1.5rem}
+.logo::after{content:"";display:inline-block;width:.42em;height:.42em;background:var(--coiron);border-radius:50%;margin-left:.12em}
+.sub{color:var(--muted);font-family:var(--f-disp);font-weight:600;font-size:1.05rem}
+.conn{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600;color:var(--muted);white-space:nowrap}
+.conn i{width:9px;height:9px;border-radius:50%;background:var(--off)}
+.conn.ok i{background:var(--ok)} .conn.err i{background:var(--crit)} .conn.demo i{background:var(--coiron)} .conn.wait i{background:var(--warn)}
+
+main{padding-block:12px 100px}
+.stack{display:grid;gap:12px}
+.blk{display:grid;gap:12px;padding-block:18px;border-top:1px solid var(--line)}
+.blk:first-child{border-top:0;padding-top:4px}
+.blk h2{font-size:1.3rem}
+.eyebrow{font-family:var(--f-disp);font-weight:600;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)} .small{font-size:.88rem} .hint{font-size:.86rem;color:var(--muted)}
+.banner{display:grid;gap:8px;background:var(--surface);border:1px dashed var(--coiron);border-radius:var(--r);padding:12px 14px;font-size:.94rem}
+
+/* mapa */
+.map{position:relative;height:min(58vh,560px);min-height:300px;overflow:hidden;border-radius:var(--r);border:1px solid var(--line);
+  background-color:var(--sunk);background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:48px 48px;
+  touch-action:none;user-select:none;-webkit-user-select:none}
+.map .tiles{position:absolute;inset:0}
+.map img.tile{position:absolute;left:0;top:0;width:256px;height:256px;max-width:none;pointer-events:none;-webkit-user-drag:none}
+.map svg.ov{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.mapctl{position:absolute;right:10px;top:10px;display:grid;gap:8px}
+.mapbtn{min-width:44px;height:44px;padding-inline:10px;border-radius:10px;background:var(--surface);color:var(--ink);border:1px solid var(--line);font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.18);display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.mapbtn svg{width:20px;height:20px}
+.maptl{position:absolute;left:10px;top:10px;display:flex;gap:8px}
+.attr{position:absolute;right:4px;bottom:2px;font-size:10px;line-height:1.4;background:rgba(255,255,255,.75);color:#333;padding:0 4px;border-radius:3px;pointer-events:none}
+.editbar{margin-top:10px;background:var(--surface);border:2px solid var(--coiron);border-radius:12px;padding:12px;display:grid;gap:8px}
+.editbar .row{gap:8px}
+.lim{fill:rgba(216,173,85,.12);stroke:#D8AD55;stroke-width:3;stroke-linejoin:round}
+.lim.edit{stroke-dasharray:9 6}
+.vtx{fill:#fff;stroke:#1C2220;stroke-width:2}
+.trk{fill:none;stroke:#79AED2;stroke-width:3;stroke-linejoin:round;stroke-linecap:round;opacity:.9}
+.trkpt{fill:#79AED2}
+.mk{cursor:pointer}
+.mk circle.dot{stroke:#fff;stroke-width:3}
+.mk.st-ok circle.dot{fill:#3A7345} .mk.st-fuera circle.dot{fill:#C8402A} .mk.st-quieta circle.dot{fill:#C98A12} .mk.st-sin circle.dot{fill:#7E8781}
+.mk circle.ring{fill:none;stroke:#fff;stroke-width:2.5;stroke-dasharray:4 3}
+.mk text{font-family:var(--f-disp);font-weight:700;font-size:14px;fill:#fff;stroke:#111;stroke-width:4px;paint-order:stroke;text-anchor:middle}
+.mk text.g{font-size:13px;stroke:none;fill:#fff}
+.me{fill:#2F7CF6;stroke:#fff;stroke-width:3} .meacc{fill:rgba(47,124,246,.15);stroke:rgba(47,124,246,.5);stroke-width:1}
+
+/* lista collares */
+.estado-base{display:flex;align-items:center;gap:10px;font-size:.92rem;color:var(--muted)}
+.estado-base b{color:var(--ink)}
+.list{display:grid;border-top:1px solid var(--line)}
+.crow{display:grid;grid-template-columns:18px 1fr auto;gap:12px;align-items:center;padding:12px 2px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;width:100%}
+.crow[aria-current="true"]{background:var(--steel-soft)}
+.crow .n{font-family:var(--f-disp);font-weight:700;font-size:1.15rem}
+.crow .s{font-size:.9rem}
+.crow .r{text-align:right;font-size:.85rem;color:var(--muted);white-space:nowrap}
+.sd{width:14px;height:14px;border-radius:50%;justify-self:center}
+.sd.st-ok{background:var(--ok)} .sd.st-fuera{background:var(--crit)} .sd.st-quieta{background:var(--warn)} .sd.st-sin{background:var(--off)}
+.tx-ok{color:var(--ok)} .tx-fuera{color:var(--crit);font-weight:600} .tx-quieta{color:var(--warn);font-weight:600} .tx-sin{color:var(--muted)}
+.bat{display:inline-flex;align-items:center;gap:4px;font-variant-numeric:tabular-nums}
+.bat.low{color:var(--crit);font-weight:600}
+.det{display:grid;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.det h2{font-size:1.5rem}
+.det dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:0;font-size:.95rem}
+.det dt{color:var(--muted)} .det dd{margin:0;font-weight:500;font-variant-numeric:tabular-nums}
+.pill{display:inline-flex;align-items:center;min-height:30px;padding:3px 12px;border-radius:999px;font-weight:600;font-size:.88rem}
+.pill.st-ok{background:var(--sunk);color:var(--ok)} .pill.st-fuera{background:var(--crit-soft);color:var(--crit)} .pill.st-quieta{background:var(--warn-soft);color:var(--warn)} .pill.st-sin{background:var(--sunk);color:var(--muted)}
+
+/* alertas */
+.arow{display:grid;grid-template-columns:18px 1fr;gap:12px;padding:12px 2px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;width:100%}
+.arow .t{font-weight:600} .arow .b{font-size:.9rem;color:var(--muted)}
+.arow.nueva{background:var(--warn-soft)}
+.sev{width:12px;height:12px;margin-top:6px;justify-self:center}
+.sev.crit{background:var(--crit);border-radius:50%} .sev.warn{background:var(--warn);transform:rotate(45deg)} .sev.info{background:var(--ok);border-radius:3px}
+
+/* ajustes */
+.field{display:grid;gap:6px}
+.field label,.lab{font-family:var(--f-disp);font-weight:600;font-size:1.02rem}
+input[type=text],input[type=password],input[type=number],input[type=url],input[type=date],textarea{width:100%;min-height:48px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:380px){.grid2{grid-template-columns:1fr}}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:10px 18px;border-radius:10px;border:1px solid transparent;font-weight:600;text-decoration:none;text-align:center}
+.btn.pri{background:var(--ink);color:var(--bg)}
+.btn.sec{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.btn.steel{background:var(--steel);color:var(--on-steel)}
+.btn.danger{background:none;border-color:var(--crit);color:var(--crit)}
+.btn.link{background:none;border:0;padding-inline:4px;color:var(--steel);text-decoration:underline;min-height:44px}
+.btn.full{width:100%}
+.btn.sm{min-height:40px;padding:6px 12px;font-size:.92rem}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0}
+.switch input{width:52px;height:30px;appearance:none;-webkit-appearance:none;background:var(--line);border-radius:999px;position:relative;cursor:pointer;flex:none;transition:background .15s}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.switch input:checked{background:var(--ok)} .switch input:checked::after{left:25px}
+.crow-edit{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;padding-block:8px;border-bottom:1px solid var(--line)}
+.err{color:var(--crit);font-size:.9rem;font-weight:600}
+.okt{color:var(--ok);font-size:.9rem;font-weight:600}
+ol.guia{margin:0;padding-left:1.3em;display:grid;gap:6px;font-size:.94rem}
+code{font-size:.85em;background:var(--sunk);padding:1px 5px;border-radius:4px;word-break:break-all}
+
+/* nav */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.tabs-in{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.tabs button{position:relative;display:grid;justify-items:center;gap:2px;padding:9px 4px 10px;border:0;background:none;color:var(--muted);font-size:.8rem;font-weight:600}
+.tabs button svg{width:24px;height:24px}
+.tabs button[aria-current="page"]{color:var(--ink)}
+.tabs button[aria-current="page"] svg{stroke:var(--coiron)}
+.badge{position:absolute;top:4px;left:calc(50% + 6px);min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--crit);color:#fff;font-size:.75rem;line-height:20px;text-align:center}
+.toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%);z-index:30;background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:10px;font-weight:600;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(0,0,0,.25)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* registros en el mapa */
+.rg{cursor:pointer}
+.rg-p path{stroke:#fff;stroke-width:6;stroke-linecap:round} .rg-p path.i{stroke:#B23A26;stroke-width:3}
+.rg-s rect{fill:#2E6386;stroke:#fff;stroke-width:2}
+.maplegend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.84rem;color:var(--muted);padding-top:8px}
+.maplegend span{display:inline-flex;align-items:center;gap:5px}
+.lg-c{width:11px;height:11px;border-radius:50%;background:var(--ok);border:2px solid #fff;box-shadow:0 0 0 1px var(--line)}
+.lg-x{font-weight:800;color:var(--crit);line-height:1}
+.lg-d{width:9px;height:9px;background:var(--steel);transform:rotate(45deg)}
+
+/* registros: resumen */
+.acciones{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:360px){.acciones{grid-template-columns:1fr}}
+.big{display:grid;align-content:space-between;gap:10px;min-height:112px;text-align:left;border:0;border-radius:14px;padding:16px}
+.big b{font-family:var(--f-disp);font-size:1.4rem;line-height:1.05}
+.big span{font-size:.9rem;opacity:.92}
+.big.perdida{background:var(--rust);color:var(--on-rust)}
+.big.sarna{background:var(--steel);color:var(--on-steel)}
+.num{font-family:var(--f-disp);font-weight:700;font-size:3rem;line-height:1;font-variant-numeric:tabular-nums}
+.bigstat{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.bars{display:grid;gap:8px}
+.bar{display:grid;grid-template-columns:8.5rem 1fr 2.4rem;align-items:center;gap:10px;font-size:.95rem}
+.bar .track{height:14px;background:var(--sunk);border-radius:3px;overflow:hidden}
+.bar .fill{display:block;height:100%;background:var(--rust)}
+.bar .v{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.stacked{display:flex;height:14px;border-radius:3px;overflow:hidden;background:var(--sunk)}
+.stacked i{display:block;height:100%}
+.leg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.85rem;color:var(--muted)}
+.leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.remrow{display:grid;gap:6px}
+.remrow .h{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+.c-ok{background:var(--ok)} .c-ok2{background:var(--ok);opacity:.5} .c-warn{background:var(--warn)} .c-crit{background:var(--crit)}
+.item{display:grid;grid-template-columns:22px 1fr auto;gap:12px;align-items:center;padding:12px 2px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;width:100%}
+.item .t{font-weight:600} .item .s{font-size:.88rem;color:var(--muted)}
+.item img{width:44px;height:44px;object-fit:cover;border-radius:6px}
+.item .d{font-size:.85rem;color:var(--muted);white-space:nowrap}
+.ico{width:14px;height:14px;justify-self:center}
+.ico.perdida{background:var(--rust);border-radius:50%}
+.ico.sarna{background:var(--steel);transform:rotate(45deg);width:12px;height:12px}
+.mes{font-family:var(--f-disp);font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:.82rem;color:var(--muted);padding:18px 2px 6px}
+.ej{font-size:.72rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--coiron);margin-left:6px}
+.pend{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px;background:var(--steel-soft);border-radius:var(--r)}
+.filt{display:flex;gap:8px;flex-wrap:wrap}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-family:var(--f-disp);font-weight:600;color:var(--muted);letter-spacing:.03em}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+
+/* registros: formularios */
+.ffield{display:grid;gap:8px;padding-block:14px;border-top:1px solid var(--line)}
+.ffield>label,.ffield>.lab{font-family:var(--f-disp);font-weight:600;font-size:1.05rem}
+textarea{min-height:88px;resize:vertical}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:48px;padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:500}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.chips.lg .chip{min-height:54px;padding-inline:20px;font-size:1.05rem}
+.chips.seg{display:grid;grid-template-columns:repeat(3,1fr)}
+.chips.seg .chip{border-radius:10px;padding-inline:8px;line-height:1.15}
+.form.perdida .chip[aria-pressed="true"]{background:var(--rust);border-color:var(--rust);color:var(--on-rust)}
+.form.sarna .chip[aria-pressed="true"]{background:var(--steel);border-color:var(--steel);color:var(--on-steel)}
+.stepper{display:grid;grid-template-columns:56px minmax(0,140px) 56px;gap:8px;align-items:center}
+.stepper button{height:54px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:1.6rem;font-weight:600}
+.stepper input{text-align:center;font-family:var(--f-disp);font-weight:700;font-size:1.6rem;min-height:54px}
+.gps{display:grid;gap:8px}
+.gps .st{display:flex;align-items:center;gap:8px;font-weight:600}
+.gps .st.ok{color:var(--ok)}
+.foto img{max-width:100%;max-height:260px;border-radius:10px;display:block}
+.savebar{position:sticky;bottom:0;background:linear-gradient(to top,var(--bg) 70%,transparent);padding-block:16px 18px;margin-top:8px}
+.aviso{background:var(--steel-soft);border-radius:var(--r);padding:12px 14px;font-size:.92rem}
+.pots{display:grid;border-top:1px solid var(--line)}
+.pots div{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid var(--line);padding:4px 2px}
+.addrow{display:grid;grid-template-columns:1fr auto;gap:8px}
+
+/* hoja de detalle */
+.sheet{position:fixed;inset:0;z-index:20;display:grid;align-items:end;background:rgba(10,14,12,.5)}
+.sheet-in{background:var(--bg);border-radius:16px 16px 0 0;max-height:88vh;overflow:auto;width:100%;max-width:640px;margin:0 auto;padding:18px 16px calc(20px + env(safe-area-inset-bottom))}
+.sheet-in dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0}
+.sheet-in dt{color:var(--muted)} .sheet-in dd{margin:0;font-weight:500}
+
+/* informe */
+.informe h1{font-size:1.7rem}
+.informe h2{font-size:1.2rem;margin-top:18px}
+@media print{
+  .top,.tabs,.noprint,.toast{display:none!important}
+  body{background:#fff;color:#000;font-size:12px}
+  main{padding:0}
+  th,td{border-color:#bbb}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <div class="brand"><span class="logo">Majada</span><span class="sub" id="hdr-campo">Mi campo</span></div>
+  <span class="conn" id="conn"><i></i><span id="conn-t">…</span></span>
+</div></header>
+<main><div class="wrap">
+  <div id="v-mapa">
+    <div class="map" id="map" aria-label="Mapa del campo con la ubicación de los collares">
+      <div class="tiles" id="tiles"></div>
+      <svg class="ov" id="ov" aria-hidden="false"></svg>
+      <div class="maptl"><button class="mapbtn" id="btn-capa" data-act="capa">Ver mapa</button><button class="mapbtn" id="btn-reg" data-act="ver-reg" aria-pressed="true">Registros</button></div>
+      <div class="mapctl">
+        <button class="mapbtn" data-act="zin" aria-label="Acercar">+</button>
+        <button class="mapbtn" data-act="zout" aria-label="Alejar">−</button>
+        <button class="mapbtn" data-act="fit" aria-label="Ver todas las ovejas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+        <button class="mapbtn" data-act="yo" aria-label="Mi ubicación"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+      </div>
+      <div class="attr" id="attr"></div>
+    </div>
+    <div class="editbar" id="editbar" hidden></div>
+    <div id="panel"></div>
+  </div>
+  <div id="v-otro" hidden></div>
+</div></main>
+<nav class="tabs" aria-label="Secciones"><div class="tabs-in">
+  <button data-act="go" data-v="mapa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Mapa</button>
+  <button data-act="go" data-v="registros"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg>Registros</button>
+  <button data-act="go" data-v="alertas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></svg>Avisos<span class="badge" id="badge" hidden></span></button>
+  <button data-act="go" data-v="ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Ajustes</button>
+</div></nav>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="sheet" id="sheet" hidden><div class="sheet-in" id="sheet-in" role="dialog" aria-modal="true"></div></div>
+<input type="file" id="f-restore" accept="application/json,.json" class="vh" tabindex="-1">
+<script>
+(function(){
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const PWA = !!document.querySelector('link[rel="manifest"]');
+const H = 3600e3, MIN = 60e3;
+const HIST_MS = 72 * H, HIST_MAX = 900;
+
+/* ---------- formato ---------- */
+const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function hace(t){ const d = Date.now() - t; if (d < 90e3) return 'recién'; if (d < H) return 'hace ' + Math.round(d / MIN) + ' min'; if (d < 48 * H) return 'hace ' + Math.round(d / H) + ' h'; return 'hace ' + Math.round(d / 24 / H) + ' días'; }
+function hora(t){ const d = new Date(t), n = new Date(); const hm = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  const y = new Date(n); y.setDate(n.getDate() - 1);
+  if (d.toDateString() === n.toDateString()) return 'hoy ' + hm; if (d.toDateString() === y.toDateString()) return 'ayer ' + hm; return d.getDate() + ' ' + MESES[d.getMonth()] + ' ' + hm; }
+const mts = m => m < 1000 ? Math.round(m) + ' m' : (m / 1000).toFixed(1).replace('.', ',') + ' km';
+
+/* ---------- geo ---------- */
+const R = 6371000, rad = x => x * Math.PI / 180;
+function dist(a, b){ const dLat = rad(b.lat - a.lat), dLon = rad(b.lon - a.lon); const h = Math.sin(dLat/2)**2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon/2)**2; return 2 * R * Math.asin(Math.sqrt(h)); }
+function dentro(p, poly){ let ins = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [yi, xi] = poly[i], [yj, xj] = poly[j];
+  if (((yi > p.lat) !== (yj > p.lat)) && (p.lon < (xj - xi) * (p.lat - yi) / (yj - yi) + xi)) ins = !ins; } return ins; }
+function distBorde(p, poly){ const k = Math.cos(rad(p.lat)) * 111320, q = 111320; let best = Infinity;
+  for (let i = 0; i < poly.length; i++) { const a = poly[i], b = poly[(i + 1) % poly.length];
+    const ax = (a[1] - p.lon) * k, ay = (a[0] - p.lat) * q, bx = (b[1] - p.lon) * k, by = (b[0] - p.lat) * q;
+    const dx = bx - ax, dy = by - ay, l2 = dx * dx + dy * dy; let t = l2 ? -(ax * dx + ay * dy) / l2 : 0; t = Math.max(0, Math.min(1, t));
+    best = Math.min(best, Math.hypot(ax + t * dx, ay + t * dy)); } return best; }
+function areaHa(poly){ if (poly.length < 3) return 0; const lat0 = poly[0][0], k = Math.cos(rad(lat0)) * 111320, q = 111320; let s = 0;
+  for (let i = 0; i < poly.length; i++) { const a = poly[i], b = poly[(i + 1) % poly.length]; s += (a[1] * k) * (b[0] * q) - (b[1] * k) * (a[0] * q); } return Math.abs(s) / 2 / 10000; }
+function recorrido(hist){ let s = 0; for (let i = 1; i < hist.length; i++) { const d = dist(hist[i-1], hist[i]); if (d > 15) s += d; } return s; }
+
+/* ---------- almacenamiento ---------- */
+const DB = {
+  db: null,
+  async open(){ try { if (!('indexedDB' in window)) return; this.db = await new Promise((res, rej) => { const r = indexedDB.open('majada', 2);
+    r.onupgradeneeded = () => { const d = r.result;
+      if (!d.objectStoreNames.contains('eventos')) d.createObjectStore('eventos', { keyPath: 'id' });
+      if (!d.objectStoreNames.contains('config')) d.createObjectStore('config');
+      if (!d.objectStoreNames.contains('kv')) d.createObjectStore('kv'); };
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); r.onblocked = () => rej(new Error('blocked')); }); } catch(e) { this.db = null; } },
+  req(store, mode, fn){ return new Promise((res, rej) => { try { const t = this.db.transaction(store, mode); const r = fn(t.objectStore(store));
+    t.oncomplete = () => res(r ? r.result : undefined); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error); } catch(e) { rej(e); } }); },
+  async get(k){ if (!this.db) return null; try { return (await this.req('kv', 'readonly', s => s.get(k))) ?? null; } catch(e) { return null; } },
+  async set(k, v){ if (!this.db) return; try { await this.req('kv', 'readwrite', s => s.put(v, k)); } catch(e) {} },
+  async legacyCfg(){ if (!this.db) return null; try { return (await this.req('config', 'readonly', s => s.get('cfg'))) ?? null; } catch(e) { return null; } },
+  async evAll(){ if (!this.db) return []; try { return (await this.req('eventos', 'readonly', s => s.getAll())) || []; } catch(e) { return []; } },
+  async evPut(ev){ if (!this.db) return; try { await this.req('eventos', 'readwrite', s => s.put(ev)); } catch(e) { toast('No se pudo guardar en el celular. Hacé una copia de seguridad.'); } },
+  async evDel(id){ if (!this.db) return; try { await this.req('eventos', 'readwrite', s => s.delete(id)); } catch(e) {} },
+  async evClear(){ if (!this.db) return; try { await this.req('eventos', 'readwrite', s => s.clear()); } catch(e) {} }
+};
+const defCfg = () => ({ limite: [], demo: true, capa: 'sat', quietaH: 5, radio: 40, sinSenalH: 6, bateria: 20,
+  mqtt: { url: '', user: '', pass: '', topic: 'msh/AR/2/json/#', clientId: 'majada-' + Math.random().toString(36).slice(2, 10) },
+  notif: false, vista: null, campo: '', potreros: [], gpsAuto: false, ultimoPotrero: null, verRegistros: true });
+const S = { cfg: defCfg(), collares: {}, alertas: [], estado: {}, base: null, sel: null, tab: 'mapa', conn: 'off', connMsg: '', edit: false, editPts: null, yo: null, eventos: [], draft: null, filtro: 'todo', installEvt: null };
+let saveT;
+function guardar(){ clearTimeout(saveT); saveT = setTimeout(() => {
+  DB.set('cfg', JSON.parse(JSON.stringify(S.cfg))); DB.set('collares', S.collares); DB.set('alertas', S.alertas.slice(0, 300)); DB.set('estado', S.estado); DB.set('base', S.base); }, 400); }
+
+let toastT;
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 3200); }
+
+/* ---------- mapa (sin librerías) ---------- */
+const TS = 256, ZMIN = 3, ZMAX = 19;
+const CAPAS = {
+  sat: { url: (z, x, y) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`, attr: 'Imágenes © Esri, Maxar, Earthstar', max: 19, label: 'Ver mapa' },
+  mapa: { url: (z, x, y) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`, attr: '© OpenStreetMap', max: 19, label: 'Ver satélite' }
+};
+const M = { lat: -45.62, lon: -67.94, z: 15, w: 0, h: 0, cache: new Map(), raf: 0 };
+function proj(lat, lon, z){ const s = TS * 2 ** z; const r = rad(Math.max(-85, Math.min(85, lat))); return [(lon + 180) / 360 * s, (1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * s]; }
+function unproj(x, y, z){ const s = TS * 2 ** z; const n = Math.PI - 2 * Math.PI * y / s; return [180 / Math.PI * Math.atan(Math.sinh(n)), x / s * 360 - 180]; }
+function aPantalla(lat, lon){ const [cx, cy] = proj(M.lat, M.lon, M.z), [x, y] = proj(lat, lon, M.z); return [x - cx + M.w / 2, y - cy + M.h / 2]; }
+function desdePantalla(sx, sy){ const [cx, cy] = proj(M.lat, M.lon, M.z); return unproj(cx + sx - M.w / 2, cy + sy - M.h / 2, M.z); }
+function pedirDibujo(){ if (!M.raf) M.raf = requestAnimationFrame(() => { M.raf = 0; dibujarMapa(); }); }
+function dibujarMapa(){
+  const el = $('#map'); if (!el || $('#v-mapa').hidden) return;
+  M.w = el.clientWidth; M.h = el.clientHeight; if (!M.w || !M.h) return;
+  const capa = CAPAS[S.cfg.capa] || CAPAS.sat;
+  const [cx, cy] = proj(M.lat, M.lon, M.z), x0 = cx - M.w / 2, y0 = cy - M.h / 2, n = 2 ** M.z;
+  const need = new Set(), tiles = $('#tiles');
+  for (let tx = Math.floor(x0 / TS); tx <= Math.floor((x0 + M.w) / TS); tx++) for (let ty = Math.floor(y0 / TS); ty <= Math.floor((y0 + M.h) / TS); ty++) {
+    if (ty < 0 || ty >= n) continue; const wx = ((tx % n) + n) % n; const key = `${S.cfg.capa}/${M.z}/${tx}/${ty}`; need.add(key);
+    let img = M.cache.get(key);
+    if (!img) { img = new Image(); img.className = 'tile'; img.alt = ''; img.draggable = false; img.decoding = 'async';
+      img.onerror = () => { img.style.visibility = 'hidden'; }; img.src = capa.url(M.z, wx, ty); M.cache.set(key, img); tiles.appendChild(img); }
+    img.style.transform = `translate(${Math.round(tx * TS - x0)}px,${Math.round(ty * TS - y0)}px)`;
+  }
+  for (const [k, img] of M.cache) if (!need.has(k)) { img.remove(); M.cache.delete(k); }
+  $('#attr').textContent = capa.attr;
+  $('#btn-capa').textContent = capa.label; const br = $('#btn-reg'); br.setAttribute('aria-pressed', S.cfg.verRegistros); br.textContent = S.cfg.verRegistros ? 'Ocultar registros' : 'Ver registros';
+  dibujarCapa();
+}
+function dibujarCapa(){
+  const svg = $('#ov'); let h = '';
+  const lim = S.edit ? S.editPts : S.cfg.limite;
+  if (lim && lim.length) {
+    const pts = lim.map(p => aPantalla(p[0], p[1]).map(v => v.toFixed(1)).join(',')).join(' ');
+    h += lim.length >= 3 || !S.edit ? `<polygon class="lim${S.edit ? ' edit' : ''}" points="${pts}"/>` : `<polyline class="lim edit" style="fill:none" points="${pts}"/>`;
+    if (S.edit) h += lim.map((p, i) => { const [x, y] = aPantalla(p[0], p[1]); return `<rect class="vtx" x="${(x - 6).toFixed(1)}" y="${(y - 6).toFixed(1)}" width="12" height="12"/>`; }).join('');
+  }
+  const sel = S.sel && S.collares[S.sel];
+  if (sel && sel.hist.length > 1) {
+    const desde = Date.now() - 24 * H; const hs = sel.hist.filter(p => p.t >= desde);
+    if (hs.length > 1) { h += `<polyline class="trk" points="${hs.map(p => aPantalla(p.lat, p.lon).map(v => v.toFixed(1)).join(',')).join(' ')}"/>`;
+      const [x, y] = aPantalla(hs[0].lat, hs[0].lon); h += `<circle class="trkpt" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4"/>`; }
+  }
+  if (S.cfg.verRegistros && !S.edit) for (const ev of S.eventos) { if (ev.lat == null || ev.lon == null) continue; const [x, y] = aPantalla(ev.lat, ev.lon);
+    if (x < -20 || y < -20 || x > M.w + 20 || y > M.h + 20) continue; const tr = `translate(${x.toFixed(1)} ${y.toFixed(1)})`;
+    h += ev.tipo === 'perdida' ? `<g class="rg rg-p" data-reg="${esc(ev.id)}" transform="${tr}"><circle r="12" fill="transparent"/><path d="M-5-5L5 5M5-5L-5 5"/><path class="i" d="M-5-5L5 5M5-5L-5 5"/></g>`
+      : `<g class="rg rg-s" data-reg="${esc(ev.id)}" transform="${tr}"><circle r="12" fill="transparent"/><rect x="-5" y="-5" width="10" height="10" transform="rotate(45)"/></g>`; }
+  if (S.yo) { const [x, y] = aPantalla(S.yo.lat, S.yo.lon); const mpp = 156543.03 * Math.cos(rad(S.yo.lat)) / 2 ** M.z;
+    h += `<circle class="meacc" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${Math.min(200, (S.yo.acc || 10) / mpp).toFixed(1)}"/><circle class="me" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="8"/>`; }
+  const lista = Object.values(S.collares).filter(c => c.ultimo).sort((a, b) => (a.id === S.sel) - (b.id === S.sel));
+  for (const c of lista) {
+    const [x, y] = aPantalla(c.ultimo.lat, c.ultimo.lon); const st = estadoDe(c).clase;
+    const g = st === 'st-fuera' || st === 'st-quieta' ? '!' : st === 'st-sin' ? '?' : '';
+    h += `<g class="mk ${st}" data-collar="${esc(c.id)}" transform="translate(${x.toFixed(1)} ${y.toFixed(1)})">${c.id === S.sel ? '<circle class="ring" r="19"/>' : ''}<circle class="dot" r="12"/>${g ? `<text class="g" y="5">${g}</text>` : ''}<text y="-20">${esc(c.nombre)}</text></g>`;
+  }
+  svg.innerHTML = h;
+}
+function mover(dx, dy){ const [cx, cy] = proj(M.lat, M.lon, M.z); [M.lat, M.lon] = unproj(cx - dx, cy - dy, M.z); pedirDibujo(); }
+function zoomEn(sx, sy, dz){
+  const nz = Math.max(ZMIN, Math.min(ZMAX, M.z + dz)); if (nz === M.z) return;
+  const [lat, lon] = desdePantalla(sx, sy); M.z = nz; const [px, py] = proj(lat, lon, M.z);
+  [M.lat, M.lon] = unproj(px - (sx - M.w / 2), py - (sy - M.h / 2), M.z); pedirDibujo(); guardarVista();
+}
+function encuadrar(puntos, zmax = 17){
+  if (!puntos.length) return; const el = $('#map'); M.w = el.clientWidth || M.w; M.h = el.clientHeight || M.h;
+  let z = zmax;
+  for (; z > ZMIN; z--) { const ps = puntos.map(p => proj(p[0], p[1], z)); const xs = ps.map(p => p[0]), ys = ps.map(p => p[1]);
+    if (Math.max(...xs) - Math.min(...xs) < M.w - 90 && Math.max(...ys) - Math.min(...ys) < M.h - 110) break; }
+  const ps = puntos.map(p => proj(p[0], p[1], z)); const xs = ps.map(p => p[0]), ys = ps.map(p => p[1]);
+  M.z = z; [M.lat, M.lon] = unproj((Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2 - 8, z); pedirDibujo(); guardarVista();
+}
+function puntosTodos(){ const p = Object.values(S.collares).filter(c => c.ultimo).map(c => [c.ultimo.lat, c.ultimo.lon]).concat(S.cfg.limite); return p.length ? p : S.eventos.filter(e => e.lat != null).map(e => [e.lat, e.lon]); }
+let vistaT; function guardarVista(){ clearTimeout(vistaT); vistaT = setTimeout(() => { S.cfg.vista = { lat: M.lat, lon: M.lon, z: M.z }; guardar(); }, 800); }
+
+function iniciarGestos(){
+  const el = $('#map'); const ptrs = new Map(); let pinch = null, movido = false;
+  const local = e => { const r = el.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  el.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; el.setPointerCapture(e.pointerId);
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY }); if (ptrs.size === 1) movido = false;
+    if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = Math.hypot(a.x - b.x, a.y - b.y); } });
+  el.addEventListener('pointermove', e => { const p = ptrs.get(e.pointerId); if (!p) return;
+    if (ptrs.size === 1) { if (Math.abs(e.clientX - p.x0) + Math.abs(e.clientY - p.y0) > 7) movido = true; if (movido) mover(e.clientX - p.x, e.clientY - p.y); }
+    p.x = e.clientX; p.y = e.clientY;
+    if (ptrs.size === 2 && pinch) { movido = true; const [a, b] = [...ptrs.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y);
+      const r = el.getBoundingClientRect(), mx = (a.x + b.x) / 2 - r.left, my = (a.y + b.y) / 2 - r.top;
+      if (d / pinch > 1.5) { zoomEn(mx, my, 1); pinch = d; } else if (d / pinch < 0.66) { zoomEn(mx, my, -1); pinch = d; } } });
+  const fin = e => { if (!ptrs.has(e.pointerId)) return; ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch = null;
+    if (!movido && ptrs.size === 0 && e.type === 'pointerup') tocarMapa(e, local(e)); if (ptrs.size === 0) guardarVista(); };
+  el.addEventListener('pointerup', fin); el.addEventListener('pointercancel', fin);
+  el.addEventListener('wheel', e => { e.preventDefault(); const [x, y] = local(e); zoomEn(x, y, e.deltaY < 0 ? 1 : -1); }, { passive: false });
+  el.addEventListener('dblclick', e => { const [x, y] = local(e); zoomEn(x, y, 1); });
+  if ('ResizeObserver' in window) new ResizeObserver(() => pedirDibujo()).observe(el); else addEventListener('resize', pedirDibujo);
+}
+function tocarMapa(e, [x, y]){
+  if (S.edit) { const [lat, lon] = desdePantalla(x, y); S.editPts.push([+lat.toFixed(6), +lon.toFixed(6)]); pintarEdit(); pedirDibujo(); return; }
+  const hit = document.elementFromPoint(e.clientX, e.clientY); const g = hit && hit.closest && hit.closest('[data-collar]'); const rg = hit && hit.closest && hit.closest('[data-reg]');
+  if (g) seleccionar(g.dataset.collar, false); else if (rg) verDetalle(rg.dataset.reg); else if (S.sel) { S.sel = null; pintarPanel(); pedirDibujo(); }
+}
+
+/* ---------- MQTT sobre WebSocket (mínimo, sin librerías) ---------- */
+class MiniMQTT {
+  constructor(o){ this.o = o; this.buf = new Uint8Array(0); this.pid = 1; this.ws = null; this.retry = 0; this.cerrado = false; }
+  static str(s){ const b = new TextEncoder().encode(s); return [b.length >> 8, b.length & 255, ...b]; }
+  static largo(n){ const out = []; do { let d = n % 128; n = Math.floor(n / 128); if (n > 0) d |= 128; out.push(d); } while (n > 0); return out; }
+  paquete(tipo, cuerpo){ return new Uint8Array([tipo, ...MiniMQTT.largo(cuerpo.length), ...cuerpo]); }
+  enviar(bytes){ try { if (this.ws && this.ws.readyState === 1) this.ws.send(bytes); } catch(e) {} }
+  conectar(){
+    const o = this.o; this.cerrado = false; this.buf = new Uint8Array(0); o.estado('wait', 'Conectando…');
+    let ws; try { ws = new WebSocket(o.url, ['mqtt']); } catch(e) { this.cerrado = true; o.estado('err', 'La dirección no es válida. Tiene que empezar con wss://'); return; }
+    this.ws = ws; ws.binaryType = 'arraybuffer';
+    ws.onopen = () => { let f = o.limpia ? 0x02 : 0; const pay = [...MiniMQTT.str(o.clientId)];
+      if (o.user) { f |= 0x80; pay.push(...MiniMQTT.str(o.user)); } if (o.pass) { f |= 0x40; pay.push(...MiniMQTT.str(o.pass)); }
+      this.enviar(this.paquete(0x10, [0, 4, 77, 81, 84, 84, 4, f, 0, 60, ...pay])); };
+    ws.onmessage = ev => this.recibir(new Uint8Array(ev.data));
+    ws.onclose = () => { clearInterval(this.ping); this.ws = null; if (this.cerrado) return;
+      const espera = Math.min(60, 2 ** this.retry++); o.estado('err', `Sin conexión con el servidor. Reintento en ${espera} s.`); this.rt = setTimeout(() => this.conectar(), espera * 1000); };
+  }
+  recibir(chunk){
+    const b = new Uint8Array(this.buf.length + chunk.length); b.set(this.buf); b.set(chunk, this.buf.length); this.buf = b;
+    while (this.buf.length >= 2) { let mult = 1, len = 0, i = 1, byte;
+      do { if (i >= this.buf.length) return; byte = this.buf[i++]; len += (byte & 127) * mult; mult *= 128; } while (byte & 128);
+      if (this.buf.length < i + len) return; const tipo = this.buf[0], cuerpo = this.buf.slice(i, i + len); this.buf = this.buf.slice(i + len); this.manejar(tipo, cuerpo); }
+  }
+  manejar(tipo, c){
+    const t = tipo >> 4;
+    if (t === 2) { const rc = c[1];
+      if (rc === 0) { this.retry = 0; this.o.estado('ok', 'Conectado'); this.suscribir(this.o.topic); this.ping = setInterval(() => this.enviar(new Uint8Array([0xC0, 0])), 45000); }
+      else { this.cerrado = true; this.o.estado('err', ({ 4: 'Usuario o contraseña incorrectos.', 5: 'El servidor no autorizó la conexión.', 2: 'El servidor rechazó el identificador.', 3: 'El servidor no está disponible.' })[rc] || 'El servidor rechazó la conexión (código ' + rc + ').'); try { this.ws.close(); } catch(e) {} } }
+    else if (t === 3) { const qos = (tipo >> 1) & 3, tl = (c[0] << 8) | c[1]; const topic = new TextDecoder().decode(c.slice(2, 2 + tl)); let p = 2 + tl;
+      if (qos > 0) { const id = (c[p] << 8) | c[p + 1]; p += 2; if (qos === 1) this.enviar(new Uint8Array([0x40, 2, id >> 8, id & 255])); }
+      this.o.mensaje(topic, c.slice(p)); }
+    else if (t === 9) { if (c[2] === 0x80) this.o.estado('err', 'El servidor no aceptó el tema. Revisá el campo "Tema".'); }
+  }
+  suscribir(topic){ const id = this.pid = (this.pid % 65535) + 1; this.enviar(this.paquete(0x82, [id >> 8, id & 255, ...MiniMQTT.str(topic), 1])); }
+  terminar(){ this.cerrado = true; clearTimeout(this.rt); clearInterval(this.ping); this.enviar(new Uint8Array([0xE0, 0])); try { this.ws && this.ws.close(); } catch(e) {} this.ws = null; }
+}
+let cliente = null;
+function conectar(){
+  if (cliente) { cliente.terminar(); cliente = null; }
+  const m = S.cfg.mqtt; if (S.cfg.demo || !m.url) { S.conn = S.cfg.demo ? 'demo' : 'off'; S.connMsg = ''; pintarConn(); return; }
+  cliente = new MiniMQTT({ url: m.url.trim(), user: m.user.trim(), pass: m.pass, topic: (m.topic || 'msh/AR/2/json/#').trim(), clientId: m.clientId, limpia: false,
+    estado: (st, msg) => { S.conn = st; S.connMsg = msg; pintarConn(); if (S.tab === 'ajustes') pintarOtro(); },
+    mensaje: (topic, bytes) => procesar(topic, bytes) });
+  cliente.conectar();
+}
+
+/* ---------- mensajes de Meshtastic (JSON por MQTT) ---------- */
+const nodoId = n => '!' + (Number(n) >>> 0).toString(16).padStart(8, '0');
+let evalT;
+function procesar(topic, bytes){
+  let m; try { m = JSON.parse(new TextDecoder().decode(bytes)); } catch(e) { return; }
+  if (!m || typeof m !== 'object' || m.from == null) return;
+  const id = nodoId(m.from), ahora = Date.now();
+  let t = (Number(m.timestamp) || 0) * 1000; if (!t || t > ahora + 10 * MIN || t < ahora - 30 * 24 * H) t = ahora;
+  S.base = { id: m.sender || (S.base && S.base.id) || null, visto: Math.max(ahora, (S.base && S.base.visto) || 0) };
+  if (m.sender && id === m.sender) { guardar(); programarEval(); return; } // mensaje de la propia base del casco
+  const p = m.payload || {};
+  const c = S.collares[id] = S.collares[id] || { id, nombre: 'Collar ' + id.slice(-4).toUpperCase(), hist: [], ultimo: null, bateria: null, visto: 0, nuevo: true };
+  c.visto = Math.max(c.visto || 0, t);
+  if (m.type === 'position' && p.latitude_i != null && p.longitude_i != null) {
+    const lat = p.latitude_i / 1e7, lon = p.longitude_i / 1e7; if (!lat && !lon) return;
+    const tp = p.time ? Math.min(p.time * 1000, ahora + MIN) : t;
+    if (!c.hist.some(q => Math.abs(q.t - tp) < 1000 && q.lat === lat && q.lon === lon)) {
+      c.hist.push({ lat, lon, t: tp }); if (c.hist.length > 1 && c.hist[c.hist.length - 2].t > tp) c.hist.sort((a, b) => a.t - b.t);
+      const corte = ahora - HIST_MS; c.hist = c.hist.filter(q => q.t >= corte).slice(-HIST_MAX); c.ultimo = c.hist[c.hist.length - 1];
+    }
+  } else if (m.type === 'telemetry' && p.battery_level != null) { c.bateria = Math.min(100, Number(p.battery_level)); }
+  else if (m.type === 'nodeinfo' && c.nuevo && (p.longname || p.shortname)) { c.nombre = String(p.longname || p.shortname).slice(0, 24); }
+  guardar(); programarEval();
+}
+function programarEval(){ clearTimeout(evalT); evalT = setTimeout(() => { evaluar(); pintarTodo(); }, 400); }
+
+/* ---------- estados y avisos ---------- */
+function quietud(c, ahora){
+  const hist = c.hist, qH = S.cfg.quietaH * H; if (hist.length < 2) return null;
+  const last = hist[hist.length - 1]; if (ahora - last.t > S.cfg.sinSenalH * H) return null;
+  let i = hist.length - 1; while (i > 0 && dist(hist[i - 1], last) <= S.cfg.radio) i--;
+  const desde = hist[i].t; if (ahora - desde < qH) return null;
+  const otros = Object.values(S.collares).filter(o => o.id !== c.id && o.hist.length > 1 && ahora - o.visto < S.cfg.sinSenalH * H);
+  if (otros.length) { const semov = otros.some(o => { const w = o.hist.filter(p => p.t >= desde); return w.length > 1 && Math.max(...w.map(p => dist(p, w[w.length - 1]))) > 150; }); if (!semov) return null; }
+  return { desde, horas: (ahora - desde) / H, comparada: otros.length > 0 };
+}
+function estadoDe(c, ahora = Date.now()){
+  const lim = S.cfg.limite, baseCaida = S.base && ahora - S.base.visto > S.cfg.sinSenalH * H;
+  if (!c.ultimo) return { clase: 'st-sin', texto: 'Esperando la primera ubicación' };
+  if (!baseCaida && ahora - c.visto > S.cfg.sinSenalH * H) return { clase: 'st-sin', texto: 'Sin señal ' + hace(c.visto), sin: true };
+  if (lim.length >= 3 && !dentro(c.ultimo, lim)) return { clase: 'st-fuera', texto: 'Fuera del campo · a ' + mts(distBorde(c.ultimo, lim)) + ' del alambrado', fuera: true };
+  const q = quietud(c, ahora); if (q) return { clase: 'st-quieta', texto: `Quieta hace ${Math.floor(q.horas)} h${q.comparada ? ' (el resto se movió)' : ''}`, quieta: q };
+  return { clase: 'st-ok', texto: lim.length >= 3 ? 'Dentro del campo' : 'Ubicación al día' };
+}
+function aviso(tipo, sev, c, titulo, cuerpo, t){
+  const a = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), t: t || Date.now(), tipo, sev, collar: c ? c.id : null, titulo, cuerpo, nueva: true, demo: !!(c && c.demo) };
+  S.alertas.unshift(a); S.alertas = S.alertas.slice(0, 300);
+  if (sev !== 'info' && !a.demo) notificar(titulo, cuerpo, tipo + (c ? c.id : ''));
+}
+function evaluar(){
+  const ahora = Date.now();
+  const bq = S.base && ahora - S.base.visto > S.cfg.sinSenalH * H;
+  const be = S.estado.__base || {};
+  if (bq && !be.caida) aviso('base', 'warn', null, `La base del casco no manda datos ${hace(S.base.visto)}`, 'Revisá que estén prendidos el Starlink y la placa. Mientras tanto no llegan ubicaciones.');
+  if (!bq && be.caida) aviso('base', 'info', null, 'La base del casco volvió a mandar datos', '');
+  S.estado.__base = { caida: !!bq };
+  for (const c of Object.values(S.collares)) {
+    const e = estadoDe(c, ahora), prev = S.estado[c.id] || {}; const now = { fuera: !!e.fuera, quieta: !!e.quieta, sin: !!e.sin, bat: c.bateria != null && c.bateria <= S.cfg.bateria };
+    if (now.fuera && !prev.fuera) { let k = c.hist.length - 1; while (k > 0 && !dentro(c.hist[k - 1], S.cfg.limite)) k--;
+      aviso('fuera', 'crit', c, `${c.nombre} salió del campo`, `Está a ${mts(distBorde(c.ultimo, S.cfg.limite))} del alambrado. Tocá para ver dónde.`, c.hist[k] ? c.hist[k].t : ahora); }
+    if (!now.fuera && prev.fuera && c.ultimo && S.cfg.limite.length >= 3) aviso('volvio', 'info', c, `${c.nombre} volvió al campo`, '');
+    if (now.quieta && !prev.quieta) aviso('quieta', 'crit', c, `${c.nombre} no se mueve hace ${Math.floor(e.quieta.horas)} h`, e.quieta.comparada ? 'El resto de la majada se movió. Puede estar caída o muerta: conviene ir a ver.' : 'Puede estar descansando, caída o muerta. Conviene ir a ver.', e.quieta.desde + S.cfg.quietaH * H);
+    if (now.sin && !prev.sin) aviso('sin', 'warn', c, `Sin señal de ${c.nombre} ${hace(c.visto)}`, 'Puede ser batería agotada, el collar caído o que esté fuera del alcance de la base.');
+    if (now.bat && !prev.bat) aviso('bat', 'warn', c, `Batería baja en ${c.nombre}: ${c.bateria}%`, 'Cargalo en los próximos días.');
+    S.estado[c.id] = now;
+  }
+  guardar();
+}
+async function notificar(titulo, cuerpo, tag){
+  if (!S.cfg.notif || !('Notification' in window) || Notification.permission !== 'granted') return;
+  try { const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration();
+    if (reg) reg.showNotification(titulo, { body: cuerpo, tag, icon: 'icon-192.png', badge: 'icon-192.png' }); else new Notification(titulo, { body: cuerpo, tag }); } catch(e) {}
+}
+
+/* =====================================================================
+   REGISTROS: pérdidas por depredadores y sarna (cuaderno de campo)
+   ===================================================================== */
+const CAUSAS = [['puma','Puma'],['zorro','Zorro'],['perro','Perros'],['clima','Frío / nevada'],['otra','Enfermedad u otra'],['desconocida','No sé']];
+const CAT = [['oveja','Oveja','ovejas'],['cordero','Cordero','corderos'],['borrego','Borrego','borregos'],['carnero','Carnero','carneros'],['capon','Capón','capones']];
+const SENALES = [['cuello','Mordida en cuello o nuca'],['tapada','Tapada con pasto o tierra'],['arrastrada','Arrastrada del lugar'],['comida','Comida en parte'],['varias','Varias muertas o heridas juntas'],['huellas','Había huellas']];
+const REMEDIOS = [['ivermectina','Ivermectina'],['doramectina','Doramectina'],['moxidectina','Moxidectina'],['bano','Baño de inmersión'],['otro','Otro']];
+const RESULT = [['curados','Sin síntomas','c-ok'],['mejoraron','Mejoraron','c-ok2'],['igual','Siguen igual','c-warn'],['peor','Empeoraron','c-crit']];
+const ACCIONES = [['casos','Encontré casos'],['tratamiento','Apliqué remedio'],['revision','Revisé después']];
+const MESES_L = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const lab = (arr, v) => (arr.find(a => a[0] === v) || [v, v])[1];
+const catN = (v, n) => { const c = CAT.find(a => a[0] === v) || [v, v, v]; return n === 1 ? c[1].toLowerCase() : c[2]; };
+const ymd = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const HOY = () => ymd(new Date());
+const toDate = f => { const [y, m, d] = f.split('-').map(Number); return new Date(y, m - 1, d); };
+const fmtF = f => { const d = toDate(f); return d.getDate() + ' ' + MESES_L[d.getMonth()].slice(0, 3); };
+const fmtFL = f => { const d = toDate(f); return d.getDate() + ' de ' + MESES_L[d.getMonth()] + ' de ' + d.getFullYear(); };
+const dias = f => Math.round((toDate(HOY()) - toDate(f)) / 864e5);
+const haceTxt = n => n <= 0 ? 'hoy' : n === 1 ? 'ayer' : 'hace ' + n + ' días';
+const addDays = n => { const d = new Date(); d.setDate(d.getDate() - n); return ymd(d); };
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const byFecha = (a, b) => (b.fecha.localeCompare(a.fecha)) || ((b.creado || 0) - (a.creado || 0));
+const remLabel = ev => ev.remedio === 'otro' ? (ev.remedioOtro || 'Otro') : lab(REMEDIOS, ev.remedio);
+
+/* hoja de detalle y confirmación */
+function openSheet(html){ $('#sheet-in').innerHTML = html; $('#sheet').hidden = false; const f = $('#sheet-in button, #sheet-in a'); if (f) f.focus(); }
+function closeSheet(){ $('#sheet').hidden = true; $('#sheet-in').innerHTML = ''; }
+let confirmRes = null;
+function confirmar(msg, okLabel, peligro){
+  return new Promise(res => { confirmRes = res;
+    openSheet(`<div class="stack"><p style="font-size:1.05rem">${esc(msg)}</p><div class="row"><button class="btn ${peligro ? 'danger' : 'pri'}" data-act="conf-si">${esc(okLabel)}</button><button class="btn sec" data-act="conf-no">Cancelar</button></div></div>`); });
+}
+
+function resumen(ev){
+  if (ev.tipo === 'perdida') return `${ev.cantidad} ${catN(ev.categoria, ev.cantidad)} · ${lab(CAUSAS, ev.causa)}`;
+  if (ev.accion === 'casos') return `Sarna: ${ev.afectados} con síntomas${ev.lote ? ' de ' + ev.lote : ''}`;
+  if (ev.accion === 'tratamiento') return `Remedio: ${remLabel(ev)}${ev.tratados ? ' · ' + ev.tratados + ' animales' : ''}`;
+  const t = S.eventos.find(x => x.id === ev.tratamientoId);
+  return `Revisión: ${lab(RESULT, ev.resultado)}${t ? ' (' + remLabel(t) + ')' : ''}`;
+}
+function itemHTML(ev){
+  return `<button class="item" data-act="ver" data-id="${esc(ev.id)}"><span class="ico ${ev.tipo}" aria-hidden="true"></span>
+    <span><span class="t">${esc(resumen(ev))}</span>${ev.ejemplo ? '<span class="ej">ejemplo</span>' : ''}<br>
+    <span class="s">${esc(ev.potrero || 'Sin potrero')} · ${fmtF(ev.fecha)}${ev.lat != null ? ' · en el mapa' : ''}</span></span>
+    ${ev.foto ? `<img src="${ev.foto}" alt="">` : `<span class="d">${haceTxt(dias(ev.fecha))}</span>`}</button>`;
+}
+function pendientes(){ const rev = new Set(S.eventos.filter(e => e.accion === 'revision').map(e => e.tratamientoId)); return S.eventos.filter(e => e.accion === 'tratamiento' && !rev.has(e.id)).sort(byFecha); }
+function eficacia(){ const m = {};
+  S.eventos.filter(e => e.accion === 'revision').forEach(r => { const t = S.eventos.find(x => x.id === r.tratamientoId); if (!t) return;
+    const k = remLabel(t); m[k] = m[k] || { curados: 0, mejoraron: 0, igual: 0, peor: 0, n: 0 }; m[k][r.resultado]++; m[k].n++; });
+  return Object.entries(m).sort((a, b) => b[1].n - a[1].n); }
+
+function vistaRegistros(){
+  const y = new Date().getFullYear(), mesAct = HOY().slice(0, 7);
+  const perd = S.eventos.filter(e => e.tipo === 'perdida' && e.fecha.startsWith(String(y)));
+  const total = perd.reduce((a, e) => a + e.cantidad, 0), mes = perd.filter(e => e.fecha.startsWith(mesAct)).reduce((a, e) => a + e.cantidad, 0);
+  const porCausa = CAUSAS.map(([k, l]) => [l, perd.filter(e => e.causa === k).reduce((a, e) => a + e.cantidad, 0)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]);
+  const max = Math.max(1, ...porCausa.map(x => x[1]));
+  const pend = pendientes(), ef = eficacia();
+  let h = '';
+  if (S.cfg.demo) h += `<div class="banner" style="margin-bottom:6px"><p><b>Estás viendo datos de ejemplo.</b> Cuando quieras empezar con lo tuyo, borralos.</p><div><button class="btn sec sm" data-act="empezar">Empezar con mis datos</button></div></div>`;
+  h += `<section class="blk"><div class="acciones">
+      <button class="big perdida" data-act="nuevo" data-tipo="perdida"><b>Pérdida de animales</b><span>Puma, zorro, perros, frío…</span></button>
+      <button class="big sarna" data-act="nuevo" data-tipo="sarna"><b>Sarna</b><span>Casos, remedio, revisión</span></button></div></section>`;
+  h += `<section class="blk"><span class="eyebrow">Pérdidas en ${y}</span><div class="bigstat"><span class="num">${total}</span><span>${total === 1 ? 'animal' : 'animales'}</span><span class="muted">· ${mes} este mes</span></div>`;
+  if (porCausa.length) { const top = porCausa[0];
+    h += `<div class="bars">${porCausa.map(([l, v]) => `<div class="bar"><span>${esc(l)}</span><span class="track"><span class="fill" style="width:${(v / max * 100).toFixed(1)}%"></span></span><span class="v">${v}</span></div>`).join('')}</div>
+      <p class="small muted">${esc(top[0])} explica el ${Math.round(top[1] / total * 100)}% de las pérdidas del año. Es la causa que sospechó quien registró, no está confirmada.</p>`; }
+  else h += `<p class="muted">Todavía no hay pérdidas registradas este año.</p>`;
+  h += `</section><section class="blk"><span class="eyebrow">Sarna</span>`;
+  if (pend.length) h += `<h2>Remedios sin revisar</h2>` + pend.slice(0, 3).map(t => `<div class="pend"><p><b>${esc(remLabel(t))}</b> en ${esc(t.potrero || 'sin potrero')}<br><span class="small muted">${haceTxt(dias(t.fecha))}${t.ejemplo ? ' · ejemplo' : ''}</span></p><button class="btn steel sm" data-act="revisar" data-id="${esc(t.id)}">Registrar revisión</button></div>`).join('');
+  if (ef.length) h += `<h2>¿Funcionó cada remedio?</h2><div class="stack">` + ef.map(([k, c]) => `<div class="remrow"><div class="h"><span>${esc(k)}</span><span class="muted small">${c.n} ${c.n === 1 ? 'revisión' : 'revisiones'}</span></div>
+      <div class="stacked" role="img" aria-label="${esc(k)}: ${RESULT.map(r => c[r[0]] + ' ' + r[1].toLowerCase()).join(', ')}">${RESULT.map(r => c[r[0]] ? `<i class="${r[2]}" style="width:${(c[r[0]] / c.n * 100).toFixed(1)}%"></i>` : '').join('')}</div></div>`).join('') + `</div>
+      <div class="leg">${RESULT.map(r => `<span><i class="${r[2]}"></i>${r[1]}</span>`).join('')}</div>
+      <p class="small muted">Si un remedio deja animales "igual" o peor, consultalo con el veterinario: en Chubut se reportó sarna resistente a algunos productos.</p>`;
+  if (!pend.length && !ef.length) h += `<p class="muted">Sin registros de sarna. Cuando apliques un remedio, Majada te recuerda revisar si funcionó.</p>`;
+  h += `</section>`;
+  const pots = {}; S.eventos.forEach(e => { const k = e.potrero || 'Sin potrero'; const p = pots[k] = pots[k] || { perd: 0, sarna: 0 }; if (e.tipo === 'perdida' && e.fecha.startsWith(String(y))) p.perd += e.cantidad; if (e.accion === 'casos') p.sarna += e.afectados; });
+  const rows = Object.entries(pots).sort((a, b) => b[1].perd - a[1].perd);
+  if (rows.length) h += `<section class="blk"><h2>Por potrero</h2><div class="tbl-wrap"><table><thead><tr><th>Potrero</th><th class="n">Perdidos ${y}</th><th class="n">Casos de sarna</th></tr></thead><tbody>${rows.map(([k, p]) => `<tr><td>${esc(k)}</td><td class="n">${p.perd}</td><td class="n">${p.sarna}</td></tr>`).join('')}</tbody></table></div></section>`;
+  const f = S.filtro, evs = S.eventos.filter(e => f === 'todo' || e.tipo === f).sort(byFecha);
+  h += `<section class="blk"><h2>Historial</h2><div class="filt">${[['todo', 'Todos'], ['perdida', 'Pérdidas'], ['sarna', 'Sarna']].map(([v, l]) => `<button class="chip" data-act="filtro" data-v="${v}" aria-pressed="${f === v}">${l}</button>`).join('')}</div>`;
+  if (!evs.length) h += `<p class="muted">No hay registros acá todavía.</p>`;
+  else { let mesK = '', list = ''; evs.forEach(e => { const m = e.fecha.slice(0, 7); if (m !== mesK) { mesK = m; const d = toDate(e.fecha); list += `<div class="mes">${MESES_L[d.getMonth()]} ${d.getFullYear()}</div>`; } list += itemHTML(e); }); h += `<div>${list}</div>`; }
+  return h + `</section>`;
+}
+
+/* formularios */
+function chips(field, opts, val, o = {}){
+  return `<div class="chips ${o.cls || ''}" role="group">${opts.map(([v, l]) => { const on = o.multi ? (val || []).includes(v) : val === v;
+    return `<button type="button" class="chip" data-act="chip" data-field="${field}" data-val="${esc(v)}"${o.multi ? ' data-multi="1"' : ''} aria-pressed="${on}">${esc(l)}</button>`; }).join('')}</div>`;
+}
+function potField(d){ const opts = S.cfg.potreros.map(p => [p, p]).concat([['__nuevo', '+ Otro']]);
+  return `<div class="ffield"><span class="lab">Potrero</span>${chips('potrero', opts, d.potrero)}
+    ${d.potrero === '__nuevo' ? `<label class="vh" for="f-potnuevo">Nombre del potrero</label><input type="text" id="f-potnuevo" data-field="potreroNuevo" value="${esc(d.potreroNuevo || '')}" placeholder="Nombre del potrero">` : ''}</div>`; }
+function gpsHTML(d){ let h;
+  if (d.gpsLoading) h = `<p class="st">Buscando señal GPS…</p><p class="hint">El GPS funciona aunque no haya señal de teléfono.</p>`;
+  else if (d.lat != null) h = `<p class="st ok">Ubicación tomada${d.precision ? ' · ±' + d.precision + ' m' : d.ubicCollar ? ' · la del collar' : ''}</p><div class="row"><button type="button" class="btn sec sm" data-act="gps">Usar donde estoy</button><button type="button" class="btn link" data-act="gps-quitar">Quitar</button></div>`;
+  else h = `<button type="button" class="btn sec" data-act="gps">Tomar ubicación</button>${d.gpsError ? `<p class="err">${esc(d.gpsError)}</p>` : '<p class="hint">Parate donde encontraste el animal.</p>'}`;
+  return `<div class="gps" id="gpsbox">${h}</div>`; }
+function fotoHTML(d){ return `<div class="foto stack" id="fotobox">${d.foto ? `<img src="${d.foto}" alt="Foto del registro"><div><button type="button" class="btn link" data-act="foto-quitar">Quitar foto</button></div>` :
+  `<div class="row"><label class="btn sec" for="f-cam">Sacar foto</label><label class="btn sec" for="f-gal">Elegir de la galería</label></div>`}
+  <input type="file" id="f-cam" accept="image/*" capture="environment" class="vh" tabindex="-1"><input type="file" id="f-gal" accept="image/*" class="vh" tabindex="-1"></div>`; }
+const fechaField = (d, first) => `<div class="ffield"${first ? ' style="border-top:0"' : ''}><label for="f-fecha">Fecha</label><input type="date" id="f-fecha" data-field="fecha" value="${esc(d.fecha)}" max="${HOY()}"></div>`;
+const stepper = (id, field, val) => `<div class="stepper"><button type="button" data-act="step" data-field="${field}" data-d="-1" aria-label="Uno menos">−</button><input type="number" inputmode="numeric" min="1" id="${id}" data-field="${field}" value="${esc(val)}"><button type="button" data-act="step" data-field="${field}" data-d="1" aria-label="Uno más">+</button></div>`;
+const notasField = (d, ph) => `<div class="ffield"><label for="f-notas">Notas <span class="muted small">(opcional)</span></label><textarea id="f-notas" data-field="notas" placeholder="${esc(ph)}">${esc(d.notas)}</textarea></div>`;
+function vistaForm(){
+  const d = S.draft; if (!d) return '';
+  let h = `<div class="form ${d.tipo}"><div><button class="btn link" data-act="cancelar">← Volver</button></div><h1 style="font-size:1.7rem;margin-bottom:8px">${d.tipo === 'perdida' ? 'Pérdida de animales' : 'Sarna'}</h1>`;
+  if (d.desdeCollar && S.collares[d.desdeCollar]) h += `<div class="aviso"><p>Registrando con la ubicación del collar <b>${esc(S.collares[d.desdeCollar].nombre)}</b>.</p></div>`;
+  if (d.tipo === 'perdida') {
+    h += fechaField(d, true) + `<div class="ffield"><label for="f-cant">¿Cuántos animales?</label>${stepper('f-cant', 'cantidad', d.cantidad)}</div>`
+      + `<div class="ffield"><span class="lab">Categoría</span>${chips('categoria', CAT.map(c => [c[0], c[1]]), d.categoria)}</div>`
+      + `<div class="ffield"><span class="lab">¿Qué sospechás que fue?</span>${chips('causa', CAUSAS, d.causa, { cls: 'lg' })}</div>`
+      + `<div class="ffield"><span class="lab">Señales que viste <span class="muted small">(opcional)</span></span><p class="hint">Sirven para confirmar la causa más adelante.</p>${chips('senales', SENALES, d.senales, { multi: true })}</div>`
+      + potField(d) + `<div class="ffield"><span class="lab">Ubicación</span>${gpsHTML(d)}</div>`
+      + `<div class="ffield"><span class="lab">Foto <span class="muted small">(opcional)</span></span>${fotoHTML(d)}</div>` + notasField(d, 'Ej: huellas cerca de la aguada, cordero de 2 meses');
+  } else {
+    h += `<div class="ffield" style="border-top:0"><span class="lab">¿Qué pasó?</span>${chips('accion', ACCIONES, d.accion, { cls: 'seg' })}</div>` + fechaField(d);
+    if (d.accion === 'casos') h += `<div class="aviso"><p>La sarna ovina es de <b>denuncia obligatoria ante SENASA</b>. Este registro es para tu control y no reemplaza la denuncia.</p></div>`
+      + `<div class="ffield"><label for="f-afec">Animales con síntomas</label>${stepper('f-afec', 'afectados', d.afectados)}<p class="hint">Rascado, lana caída o apelmazada, costras.</p></div>`
+      + `<div class="ffield"><label for="f-lote">Animales en el lote <span class="muted small">(opcional)</span></label><input type="number" inputmode="numeric" id="f-lote" data-field="lote" value="${esc(d.lote)}" placeholder="Ej: 400"></div>`
+      + potField(d) + `<div class="ffield"><span class="lab">Ubicación <span class="muted small">(opcional)</span></span>${gpsHTML(d)}</div>`
+      + `<div class="ffield"><span class="lab">Foto <span class="muted small">(opcional)</span></span>${fotoHTML(d)}</div>` + notasField(d, 'Ej: lana caída en el lomo, varios rascándose en el alambrado');
+    else if (d.accion === 'tratamiento') h += `<div class="ffield"><span class="lab">¿Qué remedio?</span>${chips('remedio', REMEDIOS, d.remedio, { cls: 'lg' })}
+        ${d.remedio === 'otro' ? `<label class="vh" for="f-remotro">Nombre del remedio</label><input type="text" id="f-remotro" data-field="remedioOtro" value="${esc(d.remedioOtro)}" placeholder="Nombre del producto">` : ''}</div>`
+      + `<div class="ffield"><label for="f-trat">Animales tratados <span class="muted small">(opcional)</span></label><input type="number" inputmode="numeric" id="f-trat" data-field="tratados" value="${esc(d.tratados)}" placeholder="Ej: 400"></div>`
+      + potField(d) + notasField(d, 'Ej: producto comercial, dosis que indicó el veterinario, quién aplicó');
+    else { const trats = S.eventos.filter(e => e.accion === 'tratamiento').sort(byFecha).slice(0, 8);
+      h += trats.length ? `<div class="ffield"><span class="lab">¿Qué tratamiento revisaste?</span>${chips('tratamientoId', trats.map(t => [t.id, `${remLabel(t)} · ${fmtF(t.fecha)} · ${t.potrero || 'sin potrero'}`]), d.tratamientoId)}</div>`
+        + `<div class="ffield"><span class="lab">¿Cómo están los animales?</span>${chips('resultado', RESULT.map(r => [r[0], r[1]]), d.resultado, { cls: 'lg' })}</div>`
+        + `<div class="ffield"><label for="f-ahora">Animales con síntomas ahora <span class="muted small">(opcional)</span></label><input type="number" inputmode="numeric" id="f-ahora" data-field="afectadosAhora" value="${esc(d.afectadosAhora)}" placeholder="Ej: 3"></div>`
+        + `<div class="ffield"><span class="lab">Foto <span class="muted small">(opcional)</span></span>${fotoHTML(d)}</div>` + notasField(d, 'Ej: todavía se rascan, menos lana caída')
+        : `<p class="muted">Primero registrá un remedio aplicado; después vas a poder revisar si funcionó.</p>`; }
+  }
+  return h + `<div class="savebar"><button class="btn pri full" data-act="guardar-reg" style="min-height:56px;font-size:1.1rem">Guardar</button></div></div>`;
+}
+function nuevoRegistro(tipo, extra = {}){
+  S.volver = S.tab === 'form' ? (S.volver || 'registros') : S.tab;
+  S.draft = { tipo, fecha: HOY(), cantidad: 1, categoria: 'oveja', causa: null, senales: [], potrero: S.cfg.ultimoPotrero && S.cfg.potreros.includes(S.cfg.ultimoPotrero) ? S.cfg.ultimoPotrero : null,
+    potreroNuevo: '', notas: '', foto: null, lat: null, lon: null, precision: null, accion: 'casos', afectados: 1, lote: '', remedio: null, remedioOtro: '', tratados: '', tratamientoId: null, resultado: null, afectadosAhora: '', ...extra };
+  go('form');
+  if (S.cfg.gpsAuto && S.draft.lat == null && (tipo === 'perdida' || S.draft.accion === 'casos')) tomarGPS();
+}
+function tomarGPS(){
+  const d = S.draft; if (!d) return; const upd = () => { const b = $('#gpsbox'); if (b && S.draft === d) b.outerHTML = gpsHTML(d); };
+  if (!('geolocation' in navigator)) { d.gpsError = 'Este celular no permite tomar la ubicación.'; upd(); return; }
+  d.gpsLoading = true; d.gpsError = null; upd();
+  navigator.geolocation.getCurrentPosition(p => { d.lat = +p.coords.latitude.toFixed(6); d.lon = +p.coords.longitude.toFixed(6); d.precision = Math.round(p.coords.accuracy); d.ubicCollar = false; d.gpsLoading = false;
+    if (!S.cfg.gpsAuto) { S.cfg.gpsAuto = true; guardar(); } upd(); },
+    e => { d.gpsLoading = false; d.gpsError = e.code === 1 ? 'No hay permiso para usar la ubicación. Activalo en los ajustes del celular.' : 'No se pudo tomar la ubicación. Probá de nuevo al aire libre.'; upd(); },
+    { enableHighAccuracy: true, timeout: 25000, maximumAge: 60000 });
+}
+async function comprimir(file){ const url = URL.createObjectURL(file);
+  try { const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+    const k = Math.min(1, 1024 / Math.max(img.naturalWidth, img.naturalHeight)); const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); return c.toDataURL('image/jpeg', 0.7); } finally { URL.revokeObjectURL(url); } }
+async function guardarRegistro(){
+  const d = S.draft; const pot = d.potrero === '__nuevo' ? (d.potreroNuevo || '').trim() : (d.potrero || '');
+  const n = v => (v === '' || v == null || isNaN(+v)) ? null : Math.max(0, Math.round(+v));
+  if (d.tipo === 'perdida') { if (!(n(d.cantidad) >= 1)) return toast('Indicá cuántos animales.'); if (!d.causa) return toast('Elegí qué sospechás que fue.'); }
+  else { if (d.accion === 'casos' && !(n(d.afectados) >= 1)) return toast('Indicá cuántos animales tienen síntomas.');
+    if (d.accion === 'tratamiento' && !d.remedio) return toast('Elegí el remedio que aplicaste.');
+    if (d.accion === 'tratamiento' && d.remedio === 'otro' && !d.remedioOtro.trim()) return toast('Escribí el nombre del remedio.');
+    if (d.accion === 'revision' && !d.tratamientoId) return toast('Elegí qué tratamiento revisaste.');
+    if (d.accion === 'revision' && !d.resultado) return toast('Elegí cómo están los animales.'); }
+  if (d.potrero === '__nuevo' && !pot) return toast('Escribí el nombre del potrero.');
+  if (pot && !S.cfg.potreros.includes(pot)) S.cfg.potreros.push(pot); if (pot) S.cfg.ultimoPotrero = pot; guardar();
+  const ev = { id: uid(), creado: Date.now(), tipo: d.tipo, fecha: d.fecha || HOY(), potrero: pot, notas: (d.notas || '').trim(), foto: d.foto || null, lat: d.lat, lon: d.lon, precision: d.precision, collar: d.desdeCollar || null };
+  if (d.tipo === 'perdida') Object.assign(ev, { cantidad: n(d.cantidad), categoria: d.categoria, causa: d.causa, senales: d.senales.slice() });
+  else { ev.accion = d.accion;
+    if (d.accion === 'casos') Object.assign(ev, { afectados: n(d.afectados), lote: n(d.lote) });
+    if (d.accion === 'tratamiento') Object.assign(ev, { remedio: d.remedio, remedioOtro: d.remedioOtro.trim(), tratados: n(d.tratados), lat: null, lon: null, foto: null });
+    if (d.accion === 'revision') Object.assign(ev, { tratamientoId: d.tratamientoId, resultado: d.resultado, afectados: n(d.afectadosAhora), lat: null, lon: null }); }
+  S.eventos.push(ev); await DB.evPut(ev); S.draft = null; toast('Guardado'); go(S.volver === 'mapa' ? 'mapa' : 'registros');
+}
+function verDetalle(id){
+  const e = S.eventos.find(x => x.id === id); if (!e) return;
+  const rows = [['Fecha', fmtFL(e.fecha)], ['Potrero', e.potrero || '—']];
+  if (e.tipo === 'perdida') { rows.push(['Animales', e.cantidad + ' ' + catN(e.categoria, e.cantidad)], ['Causa sospechada', lab(CAUSAS, e.causa)]); if (e.senales && e.senales.length) rows.push(['Señales', e.senales.map(s => lab(SENALES, s)).join(', ')]); }
+  else if (e.accion === 'casos') rows.push(['Con síntomas', e.afectados], ['Lote', e.lote || '—']);
+  else if (e.accion === 'tratamiento') { rows.push(['Remedio', remLabel(e)], ['Tratados', e.tratados || '—']); const r = S.eventos.find(x => x.tratamientoId === e.id); rows.push(['Revisión', r ? lab(RESULT, r.resultado) + ' (' + fmtF(r.fecha) + ')' : 'Pendiente']); }
+  else { const t = S.eventos.find(x => x.id === e.tratamientoId); rows.push(['Resultado', lab(RESULT, e.resultado)], ['Tratamiento', t ? remLabel(t) + ' del ' + fmtF(t.fecha) : '—']); if (e.afectados != null) rows.push(['Con síntomas ahora', e.afectados]); }
+  if (e.collar) rows.push(['Encontrada con', (S.collares[e.collar] && S.collares[e.collar].nombre) || 'un collar']);
+  if (e.lat != null) rows.push(['Coordenadas', `${e.lat.toFixed(5)}, ${e.lon.toFixed(5)}`]);
+  if (e.notas) rows.push(['Notas', e.notas]);
+  openSheet(`<div class="stack"><div><span class="eyebrow">${e.tipo === 'perdida' ? 'Pérdida' : 'Sarna'}${e.ejemplo ? ' · ejemplo' : ''}</span><h2 style="font-size:1.4rem">${esc(resumen(e))}</h2></div>
+    ${e.foto ? `<img src="${e.foto}" alt="Foto del registro" style="border-radius:10px">` : ''}
+    <dl>${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+    <div class="row">${e.lat != null ? `<button class="btn sec" data-act="reg-mapa" data-id="${esc(e.id)}">Ver en el mapa</button><a class="btn sec" href="https://www.google.com/maps/dir/?api=1&destination=${e.lat},${e.lon}" target="_blank" rel="noopener">Cómo llegar</a>` : ''}
+    ${e.accion === 'tratamiento' && !S.eventos.some(x => x.tratamientoId === e.id) ? `<button class="btn steel" data-act="revisar" data-id="${esc(e.id)}">Registrar revisión</button>` : ''}
+    <button class="btn sec" data-act="cerrar">Cerrar</button></div>
+    <div><button class="btn danger" data-act="borrar-reg" data-id="${esc(e.id)}">Borrar este registro</button></div></div>`);
+}
+function vistaInforme(){
+  const y = new Date().getFullYear(); const evs = S.eventos.filter(e => e.fecha.startsWith(String(y))).sort((a, b) => a.fecha.localeCompare(b.fecha));
+  const perd = evs.filter(e => e.tipo === 'perdida'), sar = evs.filter(e => e.tipo === 'sarna'); const total = perd.reduce((a, e) => a + e.cantidad, 0);
+  const porCausa = CAUSAS.map(([k, l]) => [l, perd.filter(e => e.causa === k).reduce((a, e) => a + e.cantidad, 0)]).filter(x => x[1]);
+  const coord = e => e.lat != null ? `${e.lat.toFixed(5)}, ${e.lon.toFixed(5)}` : '—';
+  return `<div class="informe stack"><div class="row noprint"><button class="btn sec" data-act="go" data-v="ajustes">← Volver</button><button class="btn pri" data-act="imprimir">Imprimir o guardar PDF</button></div>
+    <div><span class="eyebrow">Informe de pérdidas y sanidad · ${y}</span><h1>${esc(S.cfg.campo || 'Mi campo')}</h1><p class="small muted" style="margin-top:4px">Generado el ${fmtFL(HOY())} con Majada. Las causas son las sospechadas por quien registró.${evs.some(e => e.ejemplo) ? ' Incluye registros de ejemplo.' : ''}${S.cfg.limite.length >= 3 && !S.cfg.limiteDemo ? ' Superficie marcada: ' + Math.round(areaHa(S.cfg.limite)) + ' ha.' : ''}</p></div>
+    <h2>Resumen</h2><div class="tbl-wrap"><table><tbody><tr><td>Animales perdidos en el año</td><td class="n"><b>${total}</b></td></tr>${porCausa.map(([l, v]) => `<tr><td>&nbsp;&nbsp;${esc(l)}</td><td class="n">${v}</td></tr>`).join('')}<tr><td>Registros de sarna</td><td class="n">${sar.length}</td></tr></tbody></table></div>
+    <h2>Detalle de pérdidas</h2>${perd.length ? `<div class="tbl-wrap"><table><thead><tr><th>Fecha</th><th class="n">Cant.</th><th>Categoría</th><th>Causa</th><th>Potrero</th><th>Ubicación</th></tr></thead><tbody>${perd.map(e => `<tr><td>${fmtF(e.fecha)}${e.ejemplo ? ' (ej.)' : ''}</td><td class="n">${e.cantidad}</td><td>${esc(lab(CAT, e.categoria))}</td><td>${esc(lab(CAUSAS, e.causa))}</td><td>${esc(e.potrero)}</td><td class="small">${coord(e)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">Sin pérdidas registradas.</p>'}
+    <h2>Sarna</h2>${sar.length ? `<div class="tbl-wrap"><table><thead><tr><th>Fecha</th><th>Registro</th><th>Potrero</th><th>Notas</th></tr></thead><tbody>${sar.map(e => `<tr><td>${fmtF(e.fecha)}${e.ejemplo ? ' (ej.)' : ''}</td><td>${esc(resumen(e))}</td><td>${esc(e.potrero)}</td><td class="small">${esc(e.notas)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">Sin registros de sarna.</p>'}</div>`;
+}
+
+/* archivos */
+async function entregar(nombre, contenido, mime){
+  const blob = new Blob([contenido], { type: mime });
+  try { const file = new File([blob], nombre, { type: mime }); if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: nombre }); return; } } catch(e) { if (e && e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nombre; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); toast('Archivo listo: ' + nombre);
+}
+const slug = () => (S.cfg.campo || 'campo').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'campo';
+function backup(){ const cfg = JSON.parse(JSON.stringify(S.cfg)); cfg.mqtt.pass = '';
+  entregar(`majada-${slug()}-${HOY()}.json`, JSON.stringify({ app: 'majada', version: 2, exportado: new Date().toISOString(), config: cfg, eventos: S.eventos.filter(e => !e.ejemplo) }), 'application/json'); }
+function csv(){
+  const q = v => { const s = String(v ?? ''); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  const head = ['fecha', 'tipo', 'registro', 'animales', 'causa_o_remedio', 'resultado', 'potrero', 'latitud', 'longitud', 'collar', 'notas', 'ejemplo'];
+  const rows = S.eventos.slice().sort((a, b) => a.fecha.localeCompare(b.fecha)).map(e => { const t = e.accion === 'revision' ? S.eventos.find(x => x.id === e.tratamientoId) : null;
+    return [e.fecha, e.tipo === 'perdida' ? 'Pérdida' : 'Sarna', e.tipo === 'perdida' ? lab(CAT, e.categoria) : lab(ACCIONES, e.accion), e.tipo === 'perdida' ? e.cantidad : (e.accion === 'tratamiento' ? e.tratados : e.afectados),
+      e.tipo === 'perdida' ? lab(CAUSAS, e.causa) : (e.accion === 'tratamiento' ? remLabel(e) : t ? remLabel(t) : ''), e.accion === 'revision' ? lab(RESULT, e.resultado) : '', e.potrero,
+      e.lat != null ? String(e.lat).replace('.', ',') : '', e.lon != null ? String(e.lon).replace('.', ',') : '', e.collar ? ((S.collares[e.collar] || {}).nombre || e.collar) : '', e.notas, e.ejemplo ? 'sí' : ''].map(q).join(';'); });
+  entregar(`majada-${slug()}-${HOY()}.csv`, '\uFEFF' + [head.join(';')].concat(rows).join('\r\n'), 'text/csv');
+}
+async function restaurar(file){
+  try { const data = JSON.parse(await file.text()); if (data.app !== 'majada' || !Array.isArray(data.eventos)) throw new Error('formato');
+    if (!await confirmar(`La copia tiene ${data.eventos.length} registros. Se suman a los que ya tenés; no se borra nada.`, 'Restaurar')) return;
+    const ids = new Set(S.eventos.map(e => e.id)); let n = 0;
+    for (const ev of data.eventos) if (ev && ev.id && !ids.has(ev.id)) { S.eventos.push(ev); await DB.evPut(ev); n++; }
+    const c = data.config || {}; (c.potreros || []).forEach(p => { if (!S.cfg.potreros.includes(p)) S.cfg.potreros.push(p); });
+    if (!S.cfg.campo && c.campo) S.cfg.campo = c.campo; if ((!S.cfg.limite.length || S.cfg.limiteDemo) && c.limite && c.limite.length >= 3 && !c.limiteDemo) { S.cfg.limite = c.limite; S.cfg.limiteDemo = false; }
+    guardar(); toast(`Se restauraron ${n} registros`); pintarTodo(); pintarOtro();
+  } catch(e) { toast('Ese archivo no es una copia de Majada.'); }
+}
+
+/* registros de ejemplo, ubicados dentro del campo de la demostración */
+const POT_EJ = { 'Casco': [-380, -300], 'Potrero Norte': [80, 380], 'La Aguada': [-320, 120], 'Cañadón Grande': [380, -220], 'Bajo del Mallín': [20, -360] };
+async function crearRegistrosEjemplo(){
+  if (S.eventos.some(e => e.ejemplo)) return; let sd = 7; const r = () => { sd = (sd * 16807) % 2147483647; return sd / 2147483647 - 0.5; };
+  const at = p => { const [lat, lon] = mLL(POT_EJ[p][0] + r() * 100, POT_EJ[p][1] + r() * 100); return { lat, lon, precision: 8 }; };
+  const L = (id, d, cant, cat, causa, pot, sen, notas = '') => ({ id, tipo: 'perdida', fecha: addDays(d), creado: Date.now() - d * 864e5, cantidad: cant, categoria: cat, causa, potrero: pot, senales: sen, notas, foto: null, ejemplo: true, ...at(pot) });
+  const X = (id, d, pot, o, geo) => ({ id, tipo: 'sarna', fecha: addDays(d), creado: Date.now() - d * 864e5, potrero: pot, notas: '', foto: null, ejemplo: true, lat: null, lon: null, ...(geo ? at(pot) : {}), ...o });
+  const evs = [
+    L('ej-1', 142, 2, 'cordero', 'zorro', 'Bajo del Mallín', ['cuello', 'comida']), L('ej-2', 120, 1, 'oveja', 'puma', 'Cañadón Grande', ['cuello', 'tapada', 'arrastrada'], 'Huellas grandes cerca del cañadón'),
+    L('ej-3', 97, 3, 'oveja', 'clima', 'La Aguada', [], 'Nevada fuerte, animales flacos'), L('ej-4', 83, 1, 'oveja', 'puma', 'Cañadón Grande', ['tapada']),
+    L('ej-5', 61, 4, 'cordero', 'zorro', 'Potrero Norte', ['comida']), L('ej-6', 45, 5, 'oveja', 'perro', 'Casco', ['varias'], 'Perros sueltos, varias mordidas en las patas'),
+    L('ej-7', 30, 1, 'carnero', 'desconocida', 'La Aguada', []), L('ej-8', 19, 2, 'oveja', 'puma', 'Cañadón Grande', ['cuello', 'tapada']), L('ej-9', 6, 1, 'borrego', 'zorro', 'Potrero Norte', ['cuello']),
+    X('ej-10', 70, 'Potrero Norte', { accion: 'casos', afectados: 12, lote: 400, notas: 'Lana caída en el lomo, se rascan en el alambrado' }, true),
+    X('ej-11', 68, 'Potrero Norte', { accion: 'tratamiento', remedio: 'ivermectina', remedioOtro: '', tratados: 400 }),
+    X('ej-12', 50, 'Potrero Norte', { accion: 'revision', tratamientoId: 'ej-11', resultado: 'igual', afectados: 10, notas: 'Siguen rascándose' }),
+    X('ej-13', 48, 'Potrero Norte', { accion: 'tratamiento', remedio: 'bano', remedioOtro: '', tratados: 400 }),
+    X('ej-14', 28, 'Potrero Norte', { accion: 'revision', tratamientoId: 'ej-13', resultado: 'curados', afectados: 0 }),
+    X('ej-15', 22, 'La Aguada', { accion: 'casos', afectados: 5, lote: 250 }, true), X('ej-16', 20, 'La Aguada', { accion: 'tratamiento', remedio: 'doramectina', remedioOtro: '', tratados: 250 })
+  ];
+  for (const ev of evs) { S.eventos.push(ev); await DB.evPut(ev); }
+  Object.keys(POT_EJ).forEach(p => { if (!S.cfg.potreros.includes(p)) S.cfg.potreros.push(p); });
+}
+async function borrarRegistrosEjemplo(){
+  const ej = S.eventos.filter(e => e.ejemplo); S.eventos = S.eventos.filter(e => !e.ejemplo); for (const e of ej) await DB.evDel(e.id);
+  const usados = new Set(S.eventos.map(e => e.potrero).filter(Boolean)); S.cfg.potreros = S.cfg.potreros.filter(p => !(p in POT_EJ) || usados.has(p));
+  if (S.cfg.ultimoPotrero && !S.cfg.potreros.includes(S.cfg.ultimoPotrero)) S.cfg.ultimoPotrero = null;
+}
+
+/* ---------- demostración (collares simulados) ---------- */
+const DC = [-45.6235, -67.9412];
+const mLL = (dx, dy) => [+(DC[0] + dy / 111320).toFixed(6), +(DC[1] + dx / (111320 * Math.cos(rad(DC[0])))).toFixed(6)];
+const DEMO_IDS = ['!de000001', '!de000002', '!de000003'];
+let seed = 11; const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647 - 0.5; };
+const majada = t => { const th = (t / (10 * H)) * 2 * Math.PI; return [250 * Math.cos(th) - 60, 200 * Math.sin(th) + 20]; };
+function crearDemo(){
+  const ahora = Date.now(), paso = 20 * MIN, QUIETA = 7 * H, FUERA = 80 * MIN;
+  if (!S.cfg.limite.length) { S.cfg.limite = [[-520, -480], [560, -520], [610, 380], [80, 560], [-560, 420]].map(([x, y]) => mLL(x, y)); S.cfg.limiteDemo = true; }
+  const mk = (id, nombre, bat) => ({ id, nombre, hist: [], ultimo: null, bateria: bat, visto: ahora, demo: true, nuevo: false });
+  const cs = [mk(DEMO_IDS[0], 'Cencerro', 18), mk(DEMO_IDS[1], 'Manchada', 71), mk(DEMO_IDS[2], 'Oveja 3', 64)];
+  const ll = (x, y, t) => { const [lat, lon] = mLL(x, y); return { lat, lon, t }; };
+  let fijo = null, salida = null;
+  for (let t = ahora - 30 * H; t <= ahora; t += paso) {
+    const [fx, fy] = majada(t);
+    cs[0].hist.push(ll(fx + rnd() * 40, fy + rnd() * 40, t));
+    if (t < ahora - FUERA) cs[1].hist.push(ll(fx + 40 + rnd() * 50, fy + rnd() * 50, t));
+    else { if (!salida) salida = [fx + 40, fy]; const k = (t - (ahora - FUERA)) / FUERA; cs[1].hist.push(ll(salida[0] + (870 - salida[0]) * k + rnd() * 20, salida[1] + (120 - salida[1]) * k + rnd() * 20, t)); }
+    if (t < ahora - QUIETA) cs[2].hist.push(ll(fx - 30 + rnd() * 50, fy + 30 + rnd() * 50, t));
+    else { if (!fijo) fijo = [fx - 30, fy + 30]; cs[2].hist.push(ll(fijo[0] + rnd() * 10, fijo[1] + rnd() * 10, t)); }
+  }
+  for (const c of cs) { c.ultimo = c.hist[c.hist.length - 1]; S.collares[c.id] = c; }
+  S.cfg.demoFijo = fijo; S.base = { id: '!de0000ba', visto: ahora, demo: true };
+}
+function tickDemo(){
+  const ahora = Date.now(); const cs = DEMO_IDS.map(id => S.collares[id]); if (cs.some(c => !c)) return;
+  const [fx, fy] = majada(ahora);
+  const add = (c, x, y) => { const [lat, lon] = mLL(x, y); c.hist.push({ lat, lon, t: ahora }); c.hist = c.hist.filter(q => q.t >= ahora - HIST_MS).slice(-HIST_MAX); c.ultimo = c.hist[c.hist.length - 1]; c.visto = ahora; };
+  add(cs[0], fx + rnd() * 40, fy + rnd() * 40);
+  const u = cs[1].ultimo, k = Math.cos(rad(DC[0])) * 111320; add(cs[1], (u.lon - DC[1]) * k + rnd() * 16, (u.lat - DC[0]) * 111320 + rnd() * 16);
+  const f = S.cfg.demoFijo || [0, 0]; add(cs[2], f[0] + rnd() * 10, f[1] + rnd() * 10);
+  if (S.base) S.base.visto = ahora;
+}
+async function activarDemo(){ S.cfg.demo = true; crearDemo(); await crearRegistrosEjemplo(); evaluar(); guardar(); }
+async function quitarDemo(){
+  S.cfg.demo = false;
+  for (const id of Object.keys(S.collares)) if (S.collares[id].demo) { delete S.collares[id]; delete S.estado[id]; }
+  S.alertas = S.alertas.filter(a => !a.demo && !(a.tipo === 'base' && S.base && S.base.demo));
+  if (S.base && S.base.demo) S.base = null; if (S.cfg.limiteDemo) { S.cfg.limite = []; S.cfg.limiteDemo = false; }
+  if (S.sel && !S.collares[S.sel]) S.sel = null; delete S.estado.__base; delete S.cfg.demoFijo;
+  await borrarRegistrosEjemplo(); guardar();
+}
+
+/* ---------- pantallas ---------- */
+const CORTO = { 'st-ok': 'Bien', 'st-fuera': 'Fuera', 'st-quieta': 'Quieta', 'st-sin': 'Sin señal' };
+const bat = c => c.bateria == null ? '' : `<span class="bat${c.bateria <= S.cfg.bateria ? ' low' : ''}">${c.bateria}%</span>`;
+function pintarConn(){
+  const el = $('#conn'); const m = { demo: ['demo', 'Ejemplo'], ok: ['ok', 'Conectado'], wait: ['wait', 'Conectando…'], err: ['err', 'Sin conexión'], off: ['', 'Sin collares'] }[S.conn] || ['', ''];
+  el.className = 'conn ' + m[0]; $('#conn-t').textContent = m[1]; $('#hdr-campo').textContent = S.cfg.campo || 'Mi campo';
+}
+function lineaBase(){
+  if (S.cfg.demo) return 'Base del casco: <b>simulada</b>';
+  if (!S.base) return S.conn === 'ok' ? 'Conectado. Esperando el primer dato de la base del casco.' : S.cfg.mqtt.url ? 'Todavía no llegaron datos de la base del casco.' : 'Cuando tengas los collares, conectá la base en Ajustes.';
+  const d = Date.now() - S.base.visto;
+  return d < 45 * MIN ? `Base del casco: <b>recibiendo</b> · último dato ${hace(S.base.visto)}` : `<span class="tx-fuera">La base no manda datos ${hace(S.base.visto)}</span>`;
+}
+function pintarPanel(){
+  if (S.tab !== 'mapa') return;
+  const cs = Object.values(S.collares).sort((a, b) => a.nombre.localeCompare(b.nombre)); let h = '';
+  const nReg = S.eventos.filter(e => e.lat != null).length;
+  h += `<div class="maplegend"><span><i class="lg-c"></i>Oveja con collar</span>${nReg ? `<span><b class="lg-x">✕</b>Pérdida registrada</span><span><i class="lg-d"></i>Sarna</span>` : ''}</div>`;
+  if (S.cfg.demo) h += `<div class="banner" style="margin-top:10px"><p><b>Datos de ejemplo.</b> Estas ovejas y registros son simulados para que veas cómo funciona.</p><div><button class="btn sec sm" data-act="empezar">Empezar con mis datos</button></div></div>`;
+  if (!S.cfg.limite.length && !S.edit) h += `<div class="banner" style="margin-top:10px"><p>Marcá el límite del campo para que te avise si alguna oveja se va.</p><div><button class="btn sec sm" data-act="edit-start">Marcar límite</button></div></div>`;
+  const c = S.sel && S.collares[S.sel];
+  if (c) { const e = estadoDe(c); const r24 = recorrido(c.hist.filter(p => p.t >= Date.now() - 24 * H));
+    h += `<div class="det" style="margin-top:12px"><div class="row" style="justify-content:space-between"><h2>${esc(c.nombre)}</h2><span class="pill ${e.clase}">${CORTO[e.clase]}</span></div>
+      <p class="${e.clase.replace('st-', 'tx-')}">${esc(e.texto)}</p>
+      <dl>${c.ultimo ? `<dt>Última ubicación</dt><dd>${hace(c.ultimo.t)} (${hora(c.ultimo.t)})</dd>` : ''}${c.bateria != null ? `<dt>Batería</dt><dd>${bat(c)}</dd>` : ''}
+      ${c.hist.length > 1 ? `<dt>Caminó en 24 h</dt><dd>${mts(r24)}</dd>` : ''}${S.yo && c.ultimo ? `<dt>Distancia a vos</dt><dd>${mts(dist(S.yo, c.ultimo))}</dd>` : ''}
+      ${c.ultimo ? `<dt>Coordenadas</dt><dd>${c.ultimo.lat.toFixed(5)}, ${c.ultimo.lon.toFixed(5)}</dd>` : ''}</dl>
+      <div class="row">${c.ultimo ? `<a class="btn steel" href="https://www.google.com/maps/dir/?api=1&destination=${c.ultimo.lat},${c.ultimo.lon}" target="_blank" rel="noopener">Cómo llegar</a><button class="btn sec" data-act="centrar">Centrar</button>` : ''}<button class="btn link" data-act="desel">Cerrar</button></div>
+      ${c.ultimo ? `<div style="border-top:1px solid var(--line);padding-top:10px;display:grid;gap:6px"><p class="small">${e.quieta ? '<b>¿Fuiste y estaba muerta?</b> Registrala acá con la ubicación del collar.' : '¿La encontraste muerta o lastimada?'}</p><div><button class="btn ${e.quieta ? 'pri' : 'sec'} sm" data-act="perdida-collar">Registrar pérdida de esta oveja</button></div></div>` : ''}
+      <p class="hint">La línea azul en el mapa es su recorrido de las últimas 24 horas.</p></div>`; }
+  h += `<section class="blk" style="border-top:0"><span class="eyebrow">Ovejas con collar</span><p class="estado-base">${lineaBase()}</p>`;
+  h += cs.length ? `<div class="list">${cs.map(c => { const e = estadoDe(c); return `<button class="crow" data-act="sel" data-id="${esc(c.id)}" aria-current="${c.id === S.sel}">
+      <span class="sd ${e.clase}" aria-hidden="true"></span><span><span class="n">${esc(c.nombre)}</span><br><span class="s ${e.clase.replace('st-', 'tx-')}">${esc(e.texto)}</span></span>
+      <span class="r">${c.ultimo ? hace(c.ultimo.t) : ''}<br>${bat(c)}</span></button>`; }).join('')}</div>`
+    : `<p class="muted">Todavía no hay collares. Aparecen solos cuando la base recibe su primera señal. Mientras tanto podés usar Registros.</p>`;
+  $('#panel').innerHTML = h + `</section>`;
+}
+function pintarEdit(){
+  const bar = $('#editbar'); if (!S.edit) { bar.hidden = true; return; } bar.hidden = false; const n = S.editPts.length;
+  bar.innerHTML = `<p class="small"><b>Marcá el alambrado.</b> Tocá el mapa en cada esquina, en orden, o caminá hasta cada esquina y tocá "Agregar donde estoy". ${n} ${n === 1 ? 'punto' : 'puntos'}${n >= 3 ? ' · ' + Math.round(areaHa(S.editPts)) + ' ha' : ''}</p>
+    <div class="row"><button class="btn sec sm" data-act="edit-yo">Agregar donde estoy</button><button class="btn sec sm" data-act="edit-undo"${n ? '' : ' disabled'}>Deshacer</button>
+    <button class="btn pri sm" data-act="edit-ok"${n >= 3 ? '' : ' disabled'}>Listo</button><button class="btn link" data-act="edit-cancel">Cancelar</button></div>`;
+}
+function pintarOtro(){
+  const v = $('#v-otro'), t = S.tab;
+  v.innerHTML = t === 'alertas' ? vistaAlertas() : t === 'ajustes' ? vistaAjustes() : t === 'registros' ? vistaRegistros() : t === 'form' ? vistaForm() : t === 'informe' ? vistaInforme() : '';
+}
+function vistaAlertas(){
+  const nuevas = S.alertas.some(a => a.nueva);
+  let h = `<section class="blk"><div class="row" style="justify-content:space-between"><h1 style="font-size:1.6rem">Avisos</h1>${nuevas ? '<button class="btn link" data-act="leidas">Marcar como vistos</button>' : ''}</div>`;
+  if (!S.cfg.notif) h += `<div class="banner"><p>Activá los avisos del celular para enterarte aunque estés en otra app.</p><div><button class="btn sec sm" data-act="go" data-v="ajustes">Ir a Ajustes</button></div></div>`;
+  h += S.alertas.length ? `<div class="list">${S.alertas.map(a => `<button class="arow${a.nueva ? ' nueva' : ''}" data-act="ver-alerta" data-id="${esc(a.id)}"><span class="sev ${a.sev}" aria-label="${a.sev === 'crit' ? 'Urgente' : a.sev === 'warn' ? 'Atención' : 'Info'}"></span>
+      <span><span class="t">${esc(a.titulo)}</span>${a.demo ? ' <span class="hint">(ejemplo)</span>' : ''}<br><span class="b">${hora(a.t)}${a.cuerpo ? ' · ' + esc(a.cuerpo) : ''}</span></span></button>`).join('')}</div>`
+    : `<p class="muted">Sin avisos. Cuando una oveja salga del campo, deje de moverse o se quede sin batería, aparece acá.</p>`;
+  return h + `</section>`;
+}
+function vistaAjustes(){
+  const c = S.cfg, m = c.mqtt, cs = Object.values(S.collares), reales = S.eventos.filter(e => !e.ejemplo).length;
+  let h = `<section class="blk"><h1 style="font-size:1.6rem">Ajustes</h1></section>
+  <section class="blk"><h2>Mi campo</h2><div class="field"><label for="cfg-campo">Nombre del campo</label><input type="text" id="cfg-campo" data-cfg="campo" value="${esc(c.campo)}" placeholder="Ej: Estancia La Aguada"></div>
+    <span class="lab">Potreros</span><p class="hint">Aparecen como botones al registrar, para no tener que escribir.</p>
+    <div class="pots">${c.potreros.map(p => `<div><span>${esc(p)}${p in POT_EJ && c.demo ? ' <span class="hint">(ejemplo)</span>' : ''}</span><button class="btn link" data-act="quitar-pot" data-v="${esc(p)}">Quitar</button></div>`).join('') || '<p class="muted">Sin potreros cargados.</p>'}</div>
+    <div class="addrow"><label class="vh" for="cfg-newpot">Nuevo potrero</label><input type="text" id="cfg-newpot" placeholder="Nombre del potrero"><button class="btn sec" data-act="add-pot">Agregar</button></div></section>
+  <section class="blk"><h2>Límite del campo</h2><p>${c.limite.length >= 3 ? `${c.limite.length} esquinas · ${Math.round(areaHa(c.limite))} hectáreas${c.limiteDemo ? ' (del ejemplo)' : ''}` : 'Sin marcar.'}</p>
+    <div class="row"><button class="btn sec" data-act="edit-start">${c.limite.length ? 'Volver a marcar' : 'Marcar en el mapa'}</button>${c.limite.length ? '<button class="btn link" data-act="borrar-limite">Borrar límite</button>' : ''}</div></section>
+  <section class="blk"><h2>Collares</h2>${cs.length ? cs.map(k => `<div class="crow-edit"><div class="field"><label for="n-${esc(k.id)}">Nombre</label><input type="text" id="n-${esc(k.id)}" data-nombre="${esc(k.id)}" value="${esc(k.nombre)}" maxlength="24"></div>
+    <button class="btn link" data-act="quitar" data-id="${esc(k.id)}">Quitar</button><p class="hint" style="grid-column:1/-1">Código ${esc(k.id)}${k.bateria != null ? ' · batería ' + k.bateria + '%' : ''}${k.demo ? ' · ejemplo' : ''}</p></div>`).join('')
+    : '<p class="muted">Todavía no hay collares. Aparecen solos cuando la base recibe su primera señal; después les ponés nombre acá.</p>'}</section>
+  <section class="blk"><h2>Cuándo avisar</h2><div class="grid2">
+    <div class="field"><label for="q-h">Quieta más de (horas)</label><input type="number" id="q-h" data-cfgn="quietaH" min="1" max="48" value="${c.quietaH}"></div>
+    <div class="field"><label for="q-r">Se movió menos de (metros)</label><input type="number" id="q-r" data-cfgn="radio" min="10" max="500" value="${c.radio}"></div>
+    <div class="field"><label for="s-h">Sin señal más de (horas)</label><input type="number" id="s-h" data-cfgn="sinSenalH" min="1" max="72" value="${c.sinSenalH}"></div>
+    <div class="field"><label for="b-p">Batería menor a (%)</label><input type="number" id="b-p" data-cfgn="bateria" min="5" max="90" value="${c.bateria}"></div></div>
+    <p class="hint">Si llegan avisos de "quieta" cuando la majada descansa, subí las horas. Con dos o más collares, solo avisa si las demás sí se movieron.</p>
+    <label class="switch"><span class="lab">Avisos en este celular</span><input type="checkbox" id="sw-notif"${c.notif ? ' checked' : ''}></label>
+    <p class="hint">Llegan con la app abierta o minimizada. Si el celular cierra la app del todo, no llegan: para eso el paso siguiente es un bot de Telegram.</p></section>
+  <section class="blk"><h2>Conexión con la base</h2>
+    <label class="switch"><span class="lab">Datos de ejemplo</span><input type="checkbox" id="sw-demo"${c.demo ? ' checked' : ''}></label>`;
+  if (!PWA) h += `<p class="hint">Esta es una vista previa: la conexión con los collares funciona en la app instalada en el celular.</p>`;
+  else h += `<div class="field"><label for="m-url">Servidor</label><input type="url" id="m-url" data-mqtt="url" value="${esc(m.url)}" placeholder="wss://xxxx.s1.eu.hivemq.cloud:8884/mqtt" autocomplete="off" autocapitalize="off"></div>
+    <div class="grid2"><div class="field"><label for="m-user">Usuario</label><input type="text" id="m-user" data-mqtt="user" value="${esc(m.user)}" autocomplete="off" autocapitalize="off"></div>
+    <div class="field"><label for="m-pass">Contraseña</label><input type="password" id="m-pass" data-mqtt="pass" value="${esc(m.pass)}" autocomplete="off"></div></div>
+    <div class="field"><label for="m-topic">Tema</label><input type="text" id="m-topic" data-mqtt="topic" value="${esc(m.topic)}" autocapitalize="off"></div>
+    <div class="row"><button class="btn pri" data-act="conectar">${S.conn === 'ok' ? 'Reconectar' : 'Conectar'}</button>
+    ${S.conn === 'ok' ? '<span class="okt">Conectado</span>' : S.conn === 'err' ? `<span class="err">${esc(S.connMsg)}</span>` : S.conn === 'wait' ? '<span class="muted">Conectando…</span>' : ''}</div>
+    <p class="hint">Los datos de la base del casco llegan por un servidor MQTT privado (por ejemplo HiveMQ Cloud, gratis). Los pasos están en el LEEME. Nunca uses el servidor público de Meshtastic: cualquiera vería dónde están tus ovejas.</p>`;
+  h += `</section><section class="blk"><h2>Tus datos</h2>
+    <p class="hint">Todo se guarda solo en este celular. Hacé una copia de seguridad cada tanto y mandátela por WhatsApp o mail.</p>
+    <div class="stack"><button class="btn pri full" data-act="backup">Hacer copia de seguridad</button><button class="btn sec full" data-act="restore">Restaurar una copia</button>
+    <button class="btn sec full" data-act="csv">Exportar registros (Excel)</button><button class="btn sec full" data-act="go" data-v="informe">Informe para imprimir o PDF</button></div>
+    <p class="hint">${reales} registros tuyos${S.eventos.length > reales ? ` y ${S.eventos.length - reales} de ejemplo` : ''}. El recorrido de los collares se guarda 3 días.</p></section>`;
+  if (PWA && !(matchMedia('(display-mode: standalone)').matches || navigator.standalone)) h += `<section class="blk"><h2>Instalar en el celular</h2>${S.installEvt ? '<div><button class="btn pri" data-act="instalar">Instalar Majada</button></div>' : '<p class="hint">En Chrome: tocá los tres puntitos ⋮ y "Agregar a pantalla principal". En iPhone: Compartir → "Agregar a inicio".</p>'}</section>`;
+  h += `<section class="blk"><h2>Borrar</h2><div class="row"><button class="btn sec" data-act="borrar-hist">Borrar recorridos y avisos</button><button class="btn danger" data-act="borrar-todo">Borrar todos los registros</button></div></section>
+  <p class="hint">Majada v2 · collares y cuaderno de campo</p>`;
+  return h;
+}
+function pintarTodo(){
+  pintarConn(); const n = S.alertas.filter(a => a.nueva).length; const b = $('#badge'); b.hidden = !n; b.textContent = n > 9 ? '9+' : n;
+  if (S.tab === 'mapa') { pintarPanel(); pedirDibujo(); } else if (S.tab === 'alertas') pintarOtro();
+}
+function go(tab){
+  S.tab = tab; closeSheet(); $('#v-mapa').hidden = tab !== 'mapa'; $('#v-otro').hidden = tab === 'mapa'; $('.tabs').hidden = tab === 'form';
+  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-current', b.dataset.v === tab ? 'page' : 'false'));
+  if (tab === 'mapa') { pintarPanel(); pintarEdit(); pedirDibujo(); } else pintarOtro(); window.scrollTo(0, 0);
+}
+function seleccionar(id, centrar = true){
+  S.sel = id; if (S.tab !== 'mapa') go('mapa'); const c = S.collares[id];
+  if (centrar && c && c.ultimo) { M.lat = c.ultimo.lat; M.lon = c.ultimo.lon; if (M.z < 16) M.z = 16; }
+  pintarPanel(); pedirDibujo(); if (centrar) window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function empezarEdit(){ S.edit = true; S.editPts = S.cfg.limite.length && !S.cfg.limiteDemo ? S.cfg.limite.slice() : []; S.sel = null; go('mapa'); pintarEdit(); pintarPanel(); if (S.cfg.limite.length) encuadrar(S.cfg.limite, 17); }
+function terminarEdit(ok){ if (ok) { S.cfg.limite = S.editPts.slice(); S.cfg.limiteDemo = false; for (const k in S.estado) if (S.estado[k]) S.estado[k].fuera = false; toast('Límite guardado: ' + Math.round(areaHa(S.cfg.limite)) + ' ha'); }
+  S.edit = false; S.editPts = null; pintarEdit(); evaluar(); pintarTodo(); guardar(); }
+let watchId = null;
+function miUbicacion(accion){
+  if (!('geolocation' in navigator)) return toast('Este celular no permite usar la ubicación.');
+  const err = e => toast(e && e.code === 1 ? 'No hay permiso para usar tu ubicación. Activalo en los ajustes del celular.' : 'No se pudo obtener tu ubicación. Probá al aire libre.');
+  if (accion === 'punto') { navigator.geolocation.getCurrentPosition(p => { S.editPts.push([+p.coords.latitude.toFixed(6), +p.coords.longitude.toFixed(6)]); S.yo = { lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy }; pintarEdit(); pedirDibujo(); toast('Esquina agregada (±' + Math.round(p.coords.accuracy) + ' m)'); }, err, { enableHighAccuracy: true, timeout: 25000, maximumAge: 5000 }); return; }
+  let primera = true;
+  if (watchId == null) watchId = navigator.geolocation.watchPosition(p => { S.yo = { lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy };
+    if (primera) { primera = false; M.lat = S.yo.lat; M.lon = S.yo.lon; if (M.z < 16) M.z = 16; } pedirDibujo(); if (S.sel) pintarPanel(); }, e => { err(e); navigator.geolocation.clearWatch(watchId); watchId = null; }, { enableHighAccuracy: true, timeout: 30000, maximumAge: 10000 });
+  else if (S.yo) { M.lat = S.yo.lat; M.lon = S.yo.lon; pedirDibujo(); }
+}
+function rerenderForm(){ const y = window.scrollY; pintarOtro(); window.scrollTo(0, y); }
+
+/* ---------- eventos ---------- */
+document.addEventListener('click', async ev => {
+  const t = ev.target.closest('[data-act]');
+  if (!t) { if (ev.target.id === 'sheet') { closeSheet(); if (confirmRes) { confirmRes(false); confirmRes = null; } } return; }
+  if (t.disabled) return; const a = t.dataset.act, d = S.draft;
+  switch (a) {
+    case 'go': go(t.dataset.v); break;
+    case 'sel': seleccionar(t.dataset.id); break;
+    case 'desel': S.sel = null; pintarPanel(); pedirDibujo(); break;
+    case 'centrar': { const c = S.collares[S.sel]; if (c && c.ultimo) { M.lat = c.ultimo.lat; M.lon = c.ultimo.lon; if (M.z < 16) M.z = 16; pedirDibujo(); window.scrollTo({ top: 0, behavior: 'smooth' }); } break; }
+    case 'capa': S.cfg.capa = S.cfg.capa === 'sat' ? 'mapa' : 'sat'; guardar(); pedirDibujo(); break;
+    case 'ver-reg': S.cfg.verRegistros = !S.cfg.verRegistros; guardar(); pedirDibujo(); break;
+    case 'zin': zoomEn(M.w / 2, M.h / 2, 1); break;
+    case 'zout': zoomEn(M.w / 2, M.h / 2, -1); break;
+    case 'fit': { const p = puntosTodos(); if (p.length) encuadrar(p); else toast('Todavía no hay ubicaciones.'); break; }
+    case 'yo': miUbicacion(); break;
+    case 'edit-start': empezarEdit(); break;
+    case 'edit-yo': miUbicacion('punto'); break;
+    case 'edit-undo': S.editPts.pop(); pintarEdit(); pedirDibujo(); break;
+    case 'edit-ok': terminarEdit(true); break;
+    case 'edit-cancel': terminarEdit(false); break;
+    case 'borrar-limite': S.cfg.limite = []; S.cfg.limiteDemo = false; evaluar(); guardar(); pintarOtro(); toast('Límite borrado'); break;
+    case 'leidas': S.alertas.forEach(x => x.nueva = false); guardar(); pintarTodo(); pintarOtro(); break;
+    case 'ver-alerta': { const al = S.alertas.find(x => x.id === t.dataset.id); if (!al) break; al.nueva = false; guardar();
+      if (al.collar && S.collares[al.collar]) seleccionar(al.collar); else go('mapa'); pintarTodo(); break; }
+    case 'quitar': delete S.collares[t.dataset.id]; delete S.estado[t.dataset.id]; if (S.sel === t.dataset.id) S.sel = null; guardar(); pintarOtro(); toast('Collar quitado. Si vuelve a mandar señal, aparece de nuevo.'); break;
+    case 'conectar': if (!S.cfg.mqtt.url.trim()) { toast('Completá la dirección del servidor.'); break; }
+      if (S.cfg.demo) await quitarDemo(); guardar(); conectar(); pintarOtro(); break;
+    case 'empezar': if (await confirmar('Se borran las ovejas y los registros de ejemplo. Lo que cargaste vos no se toca.', 'Borrar ejemplos')) {
+      await quitarDemo(); conectar(); evaluar(); pintarTodo(); if (S.tab !== 'mapa') pintarOtro(); toast('Listo. Empezá marcando el límite del campo o cargando un registro.'); } break;
+    case 'borrar-hist': for (const c of Object.values(S.collares)) c.hist = c.ultimo ? [c.ultimo] : []; S.alertas = []; guardar(); pintarTodo(); pintarOtro(); toast('Recorridos y avisos borrados'); break;
+    case 'borrar-todo': if (await confirmar(`¿Borrar los ${S.eventos.length} registros de pérdidas y sarna? Hacé una copia antes. No se puede deshacer.`, 'Borrar todo', true)) { S.eventos = []; await DB.evClear(); pintarOtro(); pintarTodo(); toast('Se borraron todos los registros'); } break;
+    /* registros */
+    case 'nuevo': nuevoRegistro(t.dataset.tipo); break;
+    case 'perdida-collar': { const c = S.collares[S.sel]; if (!c || !c.ultimo) break;
+      nuevoRegistro('perdida', { lat: c.ultimo.lat, lon: c.ultimo.lon, precision: null, ubicCollar: true, desdeCollar: c.id, notas: `Encontrada con el collar "${c.nombre}".` }); break; }
+    case 'revisar': closeSheet(); nuevoRegistro('sarna', { accion: 'revision', tratamientoId: t.dataset.id, potrero: (S.eventos.find(e => e.id === t.dataset.id) || {}).potrero || null }); break;
+    case 'cancelar': S.draft = null; go(S.volver === 'mapa' ? 'mapa' : 'registros'); break;
+    case 'chip': { const f = t.dataset.field, val = t.dataset.val;
+      if (t.dataset.multi) { const arr = d[f]; const i = arr.indexOf(val); i >= 0 ? arr.splice(i, 1) : arr.push(val); t.setAttribute('aria-pressed', i < 0); break; }
+      if (f === 'filtro') break; d[f] = val;
+      if (f === 'tratamientoId') { const tr = S.eventos.find(e => e.id === val); if (tr && tr.potrero) d.potrero = tr.potrero; }
+      rerenderForm();
+      if (f === 'accion' && val === 'casos' && S.cfg.gpsAuto && d.lat == null) tomarGPS();
+      if (f === 'potrero' && val === '__nuevo') { const i = $('#f-potnuevo'); if (i) i.focus(); } break; }
+    case 'step': { const f = t.dataset.field; const v = Math.max(1, (parseInt(d[f], 10) || 0) + parseInt(t.dataset.d, 10)); d[f] = v; const inp = t.parentNode.querySelector('input'); if (inp) inp.value = v; break; }
+    case 'gps': tomarGPS(); break;
+    case 'gps-quitar': d.lat = d.lon = d.precision = null; d.ubicCollar = false; $('#gpsbox').outerHTML = gpsHTML(d); break;
+    case 'foto-quitar': d.foto = null; $('#fotobox').outerHTML = fotoHTML(d); break;
+    case 'guardar-reg': guardarRegistro(); break;
+    case 'filtro': S.filtro = t.dataset.v; pintarOtro(); break;
+    case 'ver': verDetalle(t.dataset.id); break;
+    case 'cerrar': closeSheet(); break;
+    case 'reg-mapa': { const e = S.eventos.find(x => x.id === t.dataset.id); closeSheet(); if (!e || e.lat == null) break; S.cfg.verRegistros = true; S.sel = null; go('mapa'); M.lat = e.lat; M.lon = e.lon; if (M.z < 17) M.z = 17; pedirDibujo(); break; }
+    case 'borrar-reg': { const id = t.dataset.id; if (await confirmar('¿Borrar este registro? No se puede deshacer.', 'Borrar', true)) { S.eventos = S.eventos.filter(e => e.id !== id); await DB.evDel(id); toast('Registro borrado'); if (S.tab === 'mapa') pedirDibujo(); else pintarOtro(); } break; }
+    case 'conf-si': if (confirmRes) { const r = confirmRes; confirmRes = null; closeSheet(); r(true); } break;
+    case 'conf-no': if (confirmRes) { const r = confirmRes; confirmRes = null; closeSheet(); r(false); } break;
+    case 'add-pot': { const i = $('#cfg-newpot'); const v = (i.value || '').trim(); if (!v) { toast('Escribí el nombre del potrero.'); break; } if (!S.cfg.potreros.includes(v)) S.cfg.potreros.push(v); guardar(); pintarOtro(); toast('Potrero agregado'); break; }
+    case 'quitar-pot': S.cfg.potreros = S.cfg.potreros.filter(p => p !== t.dataset.v); guardar(); pintarOtro(); break;
+    case 'backup': backup(); break;
+    case 'restore': $('#f-restore').click(); break;
+    case 'csv': csv(); break;
+    case 'imprimir': window.print(); break;
+    case 'instalar': if (S.installEvt) { S.installEvt.prompt(); try { await S.installEvt.userChoice; } catch(e) {} S.installEvt = null; pintarOtro(); } break;
+  }
+});
+document.addEventListener('input', ev => { const t = ev.target; if (t.dataset.field && S.draft) S.draft[t.dataset.field] = t.value; });
+document.addEventListener('change', async ev => {
+  const t = ev.target;
+  if (t.dataset.nombre) { const c = S.collares[t.dataset.nombre]; if (c) { c.nombre = t.value.trim().slice(0, 24) || c.nombre; c.nuevo = false; guardar(); toast('Nombre guardado'); } }
+  else if (t.dataset.cfgn) { const v = Number(t.value); if (v > 0) { S.cfg[t.dataset.cfgn] = v; guardar(); evaluar(); toast('Guardado'); } }
+  else if (t.dataset.cfg) { S.cfg[t.dataset.cfg] = t.value.trim(); guardar(); pintarConn(); toast('Guardado'); }
+  else if (t.dataset.mqtt) { S.cfg.mqtt[t.dataset.mqtt] = t.value; guardar(); }
+  else if (t.id === 'sw-demo') { if (t.checked) { await activarDemo(); encuadrar(puntosTodos()); } else await quitarDemo(); conectar(); evaluar(); pintarOtro(); pintarTodo(); }
+  else if (t.id === 'sw-notif') {
+    if (t.checked) { if (!('Notification' in window)) { toast('Este navegador no permite avisos.'); t.checked = false; return; }
+      const p = await Notification.requestPermission(); if (p !== 'granted') { toast('No diste permiso para los avisos.'); t.checked = false; return; } }
+    S.cfg.notif = t.checked; guardar(); if (t.checked) notificar('Avisos activados', 'Así te van a llegar los avisos de las ovejas.', 'prueba'); }
+  else if ((t.id === 'f-cam' || t.id === 'f-gal') && t.files[0] && S.draft) { const d = S.draft;
+    try { d.foto = await comprimir(t.files[0]); } catch(e) { toast('No se pudo leer la foto.'); } const b = $('#fotobox'); if (b && S.draft === d) b.outerHTML = fotoHTML(d); }
+  else if (t.id === 'f-restore' && t.files[0]) { await restaurar(t.files[0]); t.value = ''; }
+});
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && !$('#sheet').hidden) { closeSheet(); if (confirmRes) { confirmRes(false); confirmRes = null; } } });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (S.cfg.demo) tickDemo(); evaluar(); pintarTodo(); } });
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); S.installEvt = e; if (S.tab === 'ajustes') pintarOtro(); });
+if (PWA && 'serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+
+(async function init(){
+  await DB.open();
+  S.eventos = await DB.evAll();
+  const cfg = await DB.get('cfg');
+  if (cfg) { const d = defCfg(); S.cfg = { ...d, ...cfg, mqtt: { ...d.mqtt, ...(cfg.mqtt || {}) } };
+    S.collares = (await DB.get('collares')) || {}; S.alertas = (await DB.get('alertas')) || []; S.estado = (await DB.get('estado')) || {}; S.base = await DB.get('base'); }
+  else { // primera vez: si venía usando el cuaderno anterior, se respetan sus datos
+    const old = await DB.legacyCfg(); if (old) { S.cfg.campo = old.campo || ''; S.cfg.potreros = (old.potreros || []).slice(); S.cfg.gpsAuto = !!old.gpsAuto; S.cfg.ultimoPotrero = old.ultimoPotrero || null; }
+    const hayReales = S.eventos.some(e => !e.ejemplo);
+    if (hayReales) { S.cfg.demo = false; const ej = S.eventos.filter(e => e.ejemplo); S.eventos = S.eventos.filter(e => !e.ejemplo); for (const e of ej) await DB.evDel(e.id); }
+    else { S.eventos = []; await DB.evClear(); S.cfg.potreros = []; await activarDemo(); }
+  }
+  if (S.cfg.demo) { if (!Object.values(S.collares).some(c => c.demo)) crearDemo(); else tickDemo(); await crearRegistrosEjemplo(); }
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch(e) {}
+  iniciarGestos();
+  if (S.cfg.vista) { M.lat = S.cfg.vista.lat; M.lon = S.cfg.vista.lon; M.z = S.cfg.vista.z; } else { M.lat = -45.86; M.lon = -67.5; M.z = 11; }
+  evaluar(); go('mapa'); pintarTodo(); guardar();
+  if (!S.cfg.vista && puntosTodos().length) encuadrar(puntosTodos());
+  conectar();
+  setInterval(() => { if (document.hidden) return; if (S.cfg.demo) tickDemo(); evaluar(); pintarTodo(); }, 15000);
+})();
+})();
+
+</script>
+</body>
+</html>
